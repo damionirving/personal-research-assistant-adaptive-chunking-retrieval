@@ -1,0 +1,29 @@
+flowchart TD
+    Start["select_model(message, documents, history)"] --> Deterministic["Deterministic router<br/>query structure + retrieval signals"]
+
+    Deterministic --> Simple{"Clearly SIMPLE?"}
+    Simple -- Yes --> SimpleRoute["SIMPLE route<br/>Gemma 3 12B answer primary"]
+    Simple -- No --> Complex{"Clearly COMPLEX?"}
+    Complex -- Yes --> ComplexRoute["COMPLEX route<br/>Gemma 4 31B Mantle answer primary"]
+    Complex -- No --> Ambiguous["AMBIGUOUS route"]
+
+    Ambiguous --> RouterFlag{"Fallback router enabled?"}
+    RouterFlag -- Yes --> Gemma3Classifier["Gemma 3 12B classifier<br/>query only, 4-8 output tokens<br/>return SIMPLE or COMPLEX"]
+    RouterFlag -- No --> ComplexFallback["Fail upward to COMPLEX route"]
+    Gemma3Classifier --> Label{"Valid label?"}
+    Label -- SIMPLE --> SimpleRoute
+    Label -- COMPLEX --> ComplexRoute
+    Label -- Invalid or error --> ComplexFallback
+    ComplexFallback --> ComplexRoute
+
+    SimpleRoute --> Gemma3["Gemma 3 12B answer provider"]
+    Gemma3 -. "retryable timeout/throttle" .-> Nova["Nova Lite request-scoped fallback"]
+    Gemma3 --> End["Answer + citations"]
+    Nova --> End
+
+    ComplexRoute --> Gemma4["Gemma 4 31B Mantle answer provider"]
+    Gemma4 -. "retryable provider failure" .-> Ministral["Ministral 14B request-scoped fallback"]
+    Gemma4 --> End
+    Ministral --> End
+
+    Example["NM-1047: multiple facts + approval rules"] -. "deterministic COMPLEX; zero classifier calls" .-> ComplexRoute

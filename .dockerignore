@@ -1,0 +1,15 @@
+.git
+.github
+.pytest_cache
+.ruff_cache
+.mypy_cache
+__pycache__
+*.pyc
+.env
+.venv
+venv
+dist
+build
+infra/cdk.out
+cdk.out
+

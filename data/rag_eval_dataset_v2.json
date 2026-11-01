@@ -1,0 +1,409 @@
+{
+  "name": "personal_research_assistant_rag_eval_v2",
+  "default_top_k": 25,
+  "eval_k": [
+    5,
+    10,
+    25
+  ],
+  "items": [
+    {
+      "id": "uploaded-rag-001",
+      "question": "How much money does a part-time employee get for the home office stipend?",
+      "intent": "direct_fact_retrieval",
+      "source_files": [
+        "acmecorp-benefits-policy.md"
+      ],
+      "expected_sections": [
+        "1.1 Home Office Stipend"
+      ],
+      "relevant_chunk_ids": [
+        "acmecorp-benefits-policy.md#chunk-2"
+      ],
+      "expected_answer_summary": "Part-time employees receive $600 for the home office stipend."
+    },
+    {
+      "id": "uploaded-rag-002",
+      "question": "How many days does a new hire have to spend their remote work stipend?",
+      "intent": "temporal_constraint",
+      "source_files": [
+        "acmecorp-benefits-policy.md"
+      ],
+      "expected_sections": [
+        "1.1 Home Office Stipend"
+      ],
+      "relevant_chunk_ids": [
+        "acmecorp-benefits-policy.md#chunk-2"
+      ],
+      "expected_answer_summary": "A new hire must use the remote work stipend within the first 90 days of employment."
+    },
+    {
+      "id": "uploaded-rag-003",
+      "question": "Can an employee use the gym reimbursement to buy running shoes?",
+      "intent": "negative_constraint",
+      "source_files": [
+        "acmecorp-benefits-policy.md"
+      ],
+      "expected_sections": [
+        "2.1 Gym Reimbursements"
+      ],
+      "relevant_chunk_ids": [
+        "acmecorp-benefits-policy.md#chunk-5"
+      ],
+      "expected_answer_summary": "No. Gym reimbursements do not cover athletic apparel."
+    },
+    {
+      "id": "uploaded-rag-004",
+      "question": "If an employee has worked at AcmeCorp for 5 years, how many weeks of paid sabbatical do they get?",
+      "intent": "numerical_synthesis",
+      "source_files": [
+        "acmecorp-benefits-policy.md"
+      ],
+      "expected_sections": [
+        "3.1 Sabbatical Leave"
+      ],
+      "relevant_chunk_ids": [
+        "acmecorp-benefits-policy.md#chunk-8"
+      ],
+      "expected_answer_summary": "After 5 consecutive years of service, employees earn a 4-week paid sabbatical."
+    },
+    {
+      "id": "uploaded-rag-005",
+      "question": "Do unused floating holidays roll over to the next year?",
+      "intent": "negative_constraint",
+      "source_files": [
+        "acmecorp-benefits-policy.md"
+      ],
+      "expected_sections": [
+        "3.2 Floating Holidays"
+      ],
+      "relevant_chunk_ids": [
+        "acmecorp-benefits-policy.md#chunk-9"
+      ],
+      "expected_answer_summary": "No. Unused floating holidays expire on December 31st and do not roll over."
+    },
+    {
+      "id": "uploaded-rag-006",
+      "question": "What is Orchid Ledger?",
+      "intent": "basic_lookup",
+      "source_files": [
+        "scenario-northstar-meridian.md"
+      ],
+      "expected_sections": [
+        "Organization Summary",
+        "Internal Product Names"
+      ],
+      "relevant_chunk_ids": [
+        "scenario-northstar-meridian.md#chunk-1",
+        "scenario-northstar-meridian.md#chunk-2"
+      ],
+      "expected_answer_summary": "Orchid Ledger is Northstar Meridian's main incident and route analytics system."
+    },
+    {
+      "id": "uploaded-rag-007",
+      "question": "Who is the regional lead for SW-7?",
+      "intent": "basic_lookup",
+      "source_files": [
+        "scenario-northstar-meridian.md"
+      ],
+      "expected_sections": [
+        "Organization Summary"
+      ],
+      "relevant_chunk_ids": [
+        "scenario-northstar-meridian.md#chunk-1"
+      ],
+      "expected_answer_summary": "Rafi Ornelas is the regional lead for SW-7."
+    },
+    {
+      "id": "uploaded-rag-008",
+      "question": "What does Blue Finch code BF-C mean?",
+      "intent": "table_code_lookup",
+      "source_files": [
+        "scenario-northstar-meridian.md"
+      ],
+      "expected_sections": [
+        "Blue Finch Packaging Program"
+      ],
+      "relevant_chunk_ids": [
+        "scenario-northstar-meridian.md#chunk-6"
+      ],
+      "expected_answer_summary": "BF-C means seal breach confirmed."
+    },
+    {
+      "id": "uploaded-rag-009",
+      "question": "If someone says an incident needs Copper Door, what does that mean?",
+      "intent": "alias_lookup",
+      "source_files": [
+        "scenario-northstar-meridian.md"
+      ],
+      "expected_sections": [
+        "Internal Product Names",
+        "Copper Door Approval"
+      ],
+      "relevant_chunk_ids": [
+        "scenario-northstar-meridian.md#chunk-2",
+        "scenario-northstar-meridian.md#chunk-4"
+      ],
+      "expected_answer_summary": "Copper Door means the incident needs manual manager approval before the credit can be issued."
+    },
+    {
+      "id": "uploaded-rag-010",
+      "question": "Are Blue Finch failures always packaging seal failures?",
+      "intent": "conditional_lookup",
+      "source_files": [
+        "scenario-northstar-meridian.md"
+      ],
+      "expected_sections": [
+        "Blue Finch Packaging Program",
+        "Example Decisions"
+      ],
+      "relevant_chunk_ids": [
+        "scenario-northstar-meridian.md#chunk-6",
+        "scenario-northstar-meridian.md#chunk-11"
+      ],
+      "expected_answer_summary": "No. Blue Finch failures count as packaging seal failures only when the record indicates seal breach confirmed or BF-C; BF-B means the seal was intact."
+    },
+    {
+      "id": "uploaded-rag-011",
+      "question": "Incident NM-1042 had a 22-minute temperature excursion and BF-B. What credit should apply, and why?",
+      "intent": "conditional_reasoning",
+      "source_files": [
+        "scenario-northstar-meridian.md"
+      ],
+      "expected_sections": [
+        "Support Credit Rules",
+        "Blue Finch Packaging Program",
+        "Incident Records",
+        "Example Decisions"
+      ],
+      "relevant_chunk_ids": [
+        "scenario-northstar-meridian.md#chunk-3",
+        "scenario-northstar-meridian.md#chunk-6",
+        "scenario-northstar-meridian.md#chunk-9",
+        "scenario-northstar-meridian.md#chunk-11"
+      ],
+      "expected_answer_summary": "The standard temperature excursion credit of $140 should apply. The 22-minute excursion falls in the 18 to 44 minute range, and BF-B does not count as a packaging seal failure because the seal was intact."
+    },
+    {
+      "id": "uploaded-rag-012",
+      "question": "Incident NM-1043 involved medical nutrition packs, a 12-minute temperature excursion, and was created by Tomas Greer. What credit applies, and is approval required?",
+      "intent": "multi_hop_exception",
+      "source_files": [
+        "scenario-northstar-meridian.md"
+      ],
+      "expected_sections": [
+        "Support Credit Rules",
+        "Lantern Pass Users",
+        "Incident Records",
+        "Example Decisions"
+      ],
+      "relevant_chunk_ids": [
+        "scenario-northstar-meridian.md#chunk-3",
+        "scenario-northstar-meridian.md#chunk-5",
+        "scenario-northstar-meridian.md#chunk-9",
+        "scenario-northstar-meridian.md#chunk-11"
+      ],
+      "expected_answer_summary": "The $210 medical nutrition exception credit applies because verified medical nutrition temperature excursions of 10 minutes or longer qualify. Copper Door approval is required because Tomas Greer is a Lantern Pass user."
+    },
+    {
+      "id": "uploaded-rag-013",
+      "question": "Incident NM-1044 was in SW-7 during July, was 2 hours 20 minutes late, and was recovered Sunday at 8:40 PM. What route delay credit applies?",
+      "intent": "exception_precedence",
+      "source_files": [
+        "scenario-northstar-meridian.md"
+      ],
+      "expected_sections": [
+        "Support Credit Rules",
+        "Silver Mile Weekend Route Recovery",
+        "Summer Exception Program",
+        "Incident Records",
+        "Example Decisions"
+      ],
+      "relevant_chunk_ids": [
+        "scenario-northstar-meridian.md#chunk-3",
+        "scenario-northstar-meridian.md#chunk-7",
+        "scenario-northstar-meridian.md#chunk-8",
+        "scenario-northstar-meridian.md#chunk-9"
+      ],
+      "expected_answer_summary": "The route delay credit is $120. The normal $60 route delay credit is doubled for SW-7 July shipments, and Silver Mile does not apply in SW-7 during July."
+    },
+    {
+      "id": "uploaded-rag-014",
+      "question": "Incident NM-1045 had BF-C but was reported 4 business days after delivery. Does the packaging seal failure credit apply?",
+      "intent": "deadline_constraint",
+      "source_files": [
+        "scenario-northstar-meridian.md"
+      ],
+      "expected_sections": [
+        "Support Credit Rules",
+        "Blue Finch Packaging Program",
+        "Incident Records"
+      ],
+      "relevant_chunk_ids": [
+        "scenario-northstar-meridian.md#chunk-3",
+        "scenario-northstar-meridian.md#chunk-6",
+        "scenario-northstar-meridian.md#chunk-9"
+      ],
+      "expected_answer_summary": "No, not under the normal packaging rule. BF-C indicates seal breach confirmed, but the packaging seal failure credit applies only if reported within 3 business days; this was reported after 4 business days."
+    },
+    {
+      "id": "uploaded-rag-015",
+      "question": "Incident NM-1046 had a 48-minute temperature excursion and a packaging seal breach confirmed. Can both credits be combined automatically?",
+      "intent": "combination_rule",
+      "source_files": [
+        "scenario-northstar-meridian.md"
+      ],
+      "expected_sections": [
+        "Support Credit Rules",
+        "Copper Door Approval",
+        "Incident Records"
+      ],
+      "relevant_chunk_ids": [
+        "scenario-northstar-meridian.md#chunk-3",
+        "scenario-northstar-meridian.md#chunk-4",
+        "scenario-northstar-meridian.md#chunk-9"
+      ],
+      "expected_answer_summary": "No. The 48-minute temperature excursion qualifies for the extended $275 credit, and packaging seal breach may qualify for $90 if timely, but credits cannot be combined for the same shipment unless Copper Door approval is recorded."
+    },
+    {
+      "id": "uploaded-rag-016",
+      "question": "Incident NM-1047 involved medical nutrition packs, a 16-minute temperature excursion, BF-C, and was created by Lena Ortiz. What should happen?",
+      "intent": "multi_hop_exception",
+      "source_files": [
+        "scenario-northstar-meridian.md"
+      ],
+      "expected_sections": [
+        "Support Credit Rules",
+        "Copper Door Approval",
+        "Lantern Pass Users",
+        "Blue Finch Packaging Program",
+        "Incident Records"
+      ],
+      "relevant_chunk_ids": [
+        "scenario-northstar-meridian.md#chunk-3",
+        "scenario-northstar-meridian.md#chunk-4",
+        "scenario-northstar-meridian.md#chunk-5",
+        "scenario-northstar-meridian.md#chunk-6"
+      ],
+      "expected_answer_summary": "The shipment qualifies for the $210 medical nutrition exception credit. BF-C indicates a seal breach, but the credit remains $210 unless Copper Door approval is present. Copper Door approval is required because Lena Ortiz is a Lantern Pass user and because more than one credit category is involved."
+    },
+    {
+      "id": "uploaded-rag-017",
+      "question": "Which incidents require Copper Door approval, and why?",
+      "intent": "global_scan",
+      "source_files": [
+        "scenario-northstar-meridian.md"
+      ],
+      "expected_sections": [
+        "Copper Door Approval",
+        "Lantern Pass Users",
+        "Incident Records",
+        "Region-Specific Notes"
+      ],
+      "relevant_chunk_ids": [
+        "scenario-northstar-meridian.md#chunk-4",
+        "scenario-northstar-meridian.md#chunk-5",
+        "scenario-northstar-meridian.md#chunk-9",
+        "scenario-northstar-meridian.md#chunk-10"
+      ],
+      "expected_answer_summary": "NM-1043 requires Copper Door approval because Tomas Greer is a Lantern Pass user. NM-1046 requires approval if both temperature and packaging credits are requested. NM-1047 requires approval because Lena Ortiz is a Lantern Pass user and because it involves multiple credit categories. NM-1045 may require approval only if a separate request triggers the 14-day rule, which is not established by the provided facts."
+    },
+    {
+      "id": "uploaded-rag-018",
+      "question": "Which incident has the highest likely credit without needing Copper Door approval?",
+      "intent": "comparison_reasoning",
+      "source_files": [
+        "scenario-northstar-meridian.md"
+      ],
+      "expected_sections": [
+        "Support Credit Rules",
+        "Copper Door Approval",
+        "Incident Records",
+        "Example Decisions"
+      ],
+      "relevant_chunk_ids": [
+        "scenario-northstar-meridian.md#chunk-3",
+        "scenario-northstar-meridian.md#chunk-4",
+        "scenario-northstar-meridian.md#chunk-9",
+        "scenario-northstar-meridian.md#chunk-11"
+      ],
+      "expected_answer_summary": "NM-1046 has the highest likely single credit without needing Copper Door approval at $275, assuming only the extended temperature credit is issued. If packaging is also requested, approval is required."
+    },
+    {
+      "id": "uploaded-rag-019",
+      "question": "Which incidents are affected by a regional exception rather than only the general rules?",
+      "intent": "exception_filtering",
+      "source_files": [
+        "scenario-northstar-meridian.md"
+      ],
+      "expected_sections": [
+        "Summer Exception Program",
+        "Incident Records",
+        "Example Decisions"
+      ],
+      "relevant_chunk_ids": [
+        "scenario-northstar-meridian.md#chunk-8",
+        "scenario-northstar-meridian.md#chunk-9",
+        "scenario-northstar-meridian.md#chunk-11"
+      ],
+      "expected_answer_summary": "NM-1044 is affected by the SW-7 July Summer Exception Program because route delay credits are doubled and Silver Mile does not apply. NM-1045 is in SW-7 during July, but its packaging issue is not changed by the regional exception."
+    },
+    {
+      "id": "uploaded-rag-020",
+      "question": "Can Rafi approve NM-1045?",
+      "intent": "authority_vs_eligibility",
+      "source_files": [
+        "scenario-northstar-meridian.md"
+      ],
+      "expected_sections": [
+        "Incident Records",
+        "Region-Specific Notes",
+        "Support Credit Rules",
+        "Copper Door Approval"
+      ],
+      "relevant_chunk_ids": [
+        "scenario-northstar-meridian.md#chunk-9",
+        "scenario-northstar-meridian.md#chunk-10",
+        "scenario-northstar-meridian.md#chunk-3",
+        "scenario-northstar-meridian.md#chunk-4"
+      ],
+      "expected_answer_summary": "Rafi Ornelas is the SW-7 regional lead and can approve Copper Door requests up to $300. However, NM-1045's normal packaging seal failure credit does not apply because it was reported after 4 business days, and the source does not state that a separate Copper Door request was created."
+    },
+    {
+      "id": "uploaded-rag-021",
+      "question": "Is a 12-minute temperature excursion ever credit eligible?",
+      "intent": "exception_lookup",
+      "source_files": [
+        "scenario-northstar-meridian.md"
+      ],
+      "expected_sections": [
+        "Support Credit Rules",
+        "Example Decisions"
+      ],
+      "relevant_chunk_ids": [
+        "scenario-northstar-meridian.md#chunk-3",
+        "scenario-northstar-meridian.md#chunk-11"
+      ],
+      "expected_answer_summary": "Yes, but only under the medical nutrition exception. General shipments need at least 18 minutes for a standard temperature credit, while medical nutrition packs qualify at 10 minutes or longer."
+    },
+    {
+      "id": "uploaded-rag-022",
+      "question": "If a shipment is recovered before Monday at 10:00 AM, is the route delay credit always reduced to $25?",
+      "intent": "exception_precedence",
+      "source_files": [
+        "scenario-northstar-meridian.md"
+      ],
+      "expected_sections": [
+        "Silver Mile Weekend Route Recovery",
+        "Summer Exception Program",
+        "Example Decisions"
+      ],
+      "relevant_chunk_ids": [
+        "scenario-northstar-meridian.md#chunk-7",
+        "scenario-northstar-meridian.md#chunk-8",
+        "scenario-northstar-meridian.md#chunk-11"
+      ],
+      "expected_answer_summary": "No. Silver Mile usually reduces the route delay credit to $25 when recovered before Monday 10:00 AM, but it cannot be applied to SW-7 shipments during July because Mesa Transfer runs the Summer Exception Program."
+    }
+  ]
+}

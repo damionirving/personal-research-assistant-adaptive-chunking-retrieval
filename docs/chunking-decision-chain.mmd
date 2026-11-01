@@ -1,0 +1,24 @@
+flowchart TD
+    Start["upload document"] --> Enabled{"PRA_ADAPTIVE_CHUNKING_ENABLED?"}
+    Enabled -- No --> Legacy["legacy TextChunker<br/>whole/section/paragraph/sentence/semantic/sliding fallback"]
+    Enabled -- Yes --> Analyze["deterministic document analysis<br/>filename + headings + sentences + tables + references + domain terms"]
+
+    Analyze --> Sections["extract markdown/section headings<br/>or create Document parent"]
+    Sections --> Tables{"PRA_TABLE_PROCESSING_ENABLED<br/>and pipe tables found?"}
+    Tables -- Yes --> TableAware["strategy: table_aware"]
+    Tables -- No --> Hierarchy{"multiple sections?"}
+    Hierarchy -- Yes --> Hierarchical["strategy: hierarchical_structure"]
+    Hierarchy -- No --> Semantic{"more than 3 sentences?"}
+    Semantic -- Yes --> SemanticBoundary["strategy: semantic_boundary"]
+    Semantic -- No --> Fixed["strategy: fixed_size"]
+
+    TableAware --> Artifacts["create parent artifacts<br/>child passage chunks<br/>table artifacts<br/>relationship artifacts"]
+    Hierarchical --> Artifacts
+    SemanticBoundary --> Artifacts
+    Fixed --> Artifacts
+
+    Artifacts --> Persist["persist adaptive artifacts<br/>adaptive/document-id/v1"]
+    Persist --> IndexChildren["embed and index child chunks"]
+    Analyze -. analysis/persistence error .-> Legacy
+    Persist -. persistence error .-> Legacy
+    Legacy --> IndexLegacy["embed and index legacy chunks"]

@@ -1,0 +1,29 @@
+flowchart TD
+    Start["score(message, answer, documents)"] --> Normalize["Normalize message and answer<br/>strip whitespace and lowercase"]
+    Normalize --> MaxScore["Find max retrieval score<br/>from RetrievedDocument.score values"]
+
+    MaxScore --> SmallTalk{"Is the message small talk?"}
+    SmallTalk -- Yes --> SmallTalkScore["Return GroundingScore<br/>hallucination_score = 0.10<br/>reason = Small talk does not require retrieved context"]
+
+    SmallTalk -- No --> HasDocs{"Were any documents retrieved?"}
+    HasDocs -- No --> Uncertain{"Does the answer express uncertainty?"}
+    Uncertain -- Yes --> NoDocsUncertain["Return GroundingScore<br/>hallucination_score = 0.25<br/>reason = No relevant context and answer expressed uncertainty"]
+    Uncertain -- No --> NoDocsFactual["Return GroundingScore<br/>hallucination_score = 0.82<br/>reason = No relevant context for a factual answer"]
+
+    HasDocs -- Yes --> ScoreMissing{"Is max_score missing?"}
+    ScoreMissing -- Yes --> MissingScore["Return GroundingScore<br/>hallucination_score = 0.65<br/>reason = Retrieved context had no usable similarity score"]
+
+    ScoreMissing -- No --> HighSimilarity{"Is max_score >= 0.82?"}
+    HighSimilarity -- Yes --> HighScore["Return GroundingScore<br/>hallucination_score = 0.16<br/>reason = High-similarity retrieved context"]
+
+    HighSimilarity -- No --> ModerateSimilarity{"Is max_score >= 0.58?"}
+    ModerateSimilarity -- Yes --> ModerateScore["Return GroundingScore<br/>hallucination_score = 0.38<br/>reason = Moderate-similarity retrieved context"]
+    ModerateSimilarity -- No --> WeakScore["Return GroundingScore<br/>hallucination_score = 0.66<br/>reason = Weak similarity to the question"]
+
+    SmallTalkScore --> End["Workflow applies grounding policy thresholds"]
+    NoDocsUncertain --> End
+    NoDocsFactual --> End
+    MissingScore --> End
+    HighScore --> End
+    ModerateScore --> End
+    WeakScore --> End

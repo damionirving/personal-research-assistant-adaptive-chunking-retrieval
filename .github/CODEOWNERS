@@ -1,0 +1,3 @@
+# Require administrator review for deployment and AWS infrastructure changes.
+.github/workflows/deploy.yml @damionirving
+infra/ @damionirving

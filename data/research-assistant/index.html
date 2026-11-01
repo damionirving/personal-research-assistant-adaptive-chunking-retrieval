@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personal Research Assistant | Tractlytics</title>
+<meta name="description" content="Upload documents, run retrieval diagnostics, and ask grounded questions with the Tractlytics Personal Research Assistant MVP.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="../favicon.ico" sizes="any">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header>
+<button class="menu-toggle" type="button" aria-label="Open navigation menu" onclick="toggleMenu()">&#9776;</button>
+<nav id="mobileNav">
+<a href="../index.html">Home</a>
+<a href="../services.html">Services</a>
+<a href="../case-studies.html">Case Studies</a>
+<a href="../experimental-work.html" class="active">Experimental Work</a>
+<a href="../about.html">About</a>
+<a href="../contact.html">Contact</a>
+</nav>
+</header>
+
+<main>
+<section class="assistant-hero">
+<div class="assistant-hero-content">
+<p class="eyebrow">Experimental AWS MVP</p>
+<h1>Personal Research Assistant</h1>
+<p class="hero-copy">Upload supported documents, run retrieval diagnostics when needed, and ask grounded questions about indexed content. Amazon Cognito secures access while AWS runs retrieval, evaluation, and AI responses.</p>
+
+<div class="auth-card">
+<h2>Secure access</h2>
+<p>Sign in through the Amazon Cognito Hosted UI. After authentication, you will return to this page and the workspace will unlock.</p>
+<div class="assistant-actions">
+<button id="sign-in-button" class="cta" type="button">Continue to Sign In</button>
+<button id="sign-out-button" class="secondary-button" type="button">Sign Out</button>
+</div>
+<p class="auth-note">Your password is handled by Amazon Cognito and is not stored by this webpage.</p>
+<p class="auth-note">VOIP Numbers are not recommended for SMS 2FAC.</p>
+<p id="auth-status" class="status-message" role="status">Checking session...</p>
+</div>
+</div>
+</section>
+
+<section class="assistant-shell">
+<div class="assistant-panel upload-panel">
+<div class="panel-header">
+<div>
+<h2>Documents</h2>
+<p>Upload a supported file so the assistant can parse, chunk, embed, and index its content.</p>
+</div>
+<div id="status" class="status-message" role="status"></div>
+</div>
+<form id="upload-form">
+<div id="upload-controls">
+<label for="file">Choose file</label>
+<input id="file" name="file" type="file" accept=".txt,.md,.markdown,text/plain,text/markdown,.pdf">
+<div class="assistant-actions">
+<button id="upload-button" class="cta" type="submit">Upload</button>
+</div>
+</div>
+<div class="assistant-actions">
+<button id="rag-eval-button" type="button" class="secondary-button action-button">Run RAG Performance Test</button>
+<button id="ragas-eval-button" type="button" class="secondary-button action-button">Run RAGAS Test</button>
+<button id="stop-ragas-button" type="button" class="secondary-button action-button" hidden>Stop RAGAS Test</button>
+</div>
+</form>
+<div id="rag-eval-progress" class="progress-panel hidden" hidden aria-live="polite">
+<div id="rag-eval-progress-label" class="progress-label"></div>
+<div class="progress-track" aria-hidden="true">
+<div class="progress-bar"></div>
+</div>
+</div>
+<p id="upload-result" class="status-message" role="status"></p>
+<p id="rag-eval-result" class="status-message" role="status"></p>
+<p id="ragas-eval-result" class="status-message" role="status"></p>
+<div id="rag-evaluation-history" class="recent-panel" hidden>
+<div class="recent-header">
+<h3>Recent evaluations</h3>
+<div class="assistant-actions">
+<button id="refresh-rag-jobs-button" type="button" class="secondary-button compact-button">Refresh</button>
+<button id="clear-rag-jobs-button" type="button" class="secondary-button compact-button">Clear</button>
+</div>
+</div>
+<div id="rag-eval-jobs" class="recent-jobs"></div>
+</div>
+</div>
+
+<div class="assistant-panel chat-panel">
+<div class="chat-header">
+<h2>Ask about your documents</h2>
+<button id="new-chat-button" type="button" class="secondary-button">New chat</button>
+</div>
+<div id="session-id" class="status-message session-meta" role="status"></div>
+<div id="messages" class="chat-messages" aria-live="polite">
+<div class="message assistant-message">
+<div class="message-body">Sign in, upload a document, and ask a question about its content.</div>
+</div>
+</div>
+<form id="chat-form" class="chat-form">
+<label class="sr-only" for="message">Question</label>
+<textarea id="message" rows="3" placeholder="What does the document say about...?" required></textarea>
+<button id="chat-button" class="cta" type="submit">Send</button>
+</form>
+</div>
+</section>
+
+<section class="assistant-note">
+<h2>How it works</h2>
+<div class="how-it-works-grid">
+<div><strong>1. Authenticate</strong><span>Amazon Cognito verifies the user.</span></div>
+<div><strong>2. Upload</strong><span>AWS stores, parses, and indexes the document.</span></div>
+<div><strong>3. Retrieve</strong><span>Hybrid retrieval finds the most relevant document chunks.</span></div>
+<div><strong>4. Answer</strong><span>Amazon Bedrock generates a grounded response.</span></div>
+</div>
+<a class="return-link" href="../experimental-work.html">Return to Experimental Work</a>
+</section>
+</main>
+
+<footer>&copy; 2026 Tractlytics | <a href="mailto:[REDACTED_EMAIL]">[REDACTED_EMAIL]</a></footer>
+
+<script>
+function toggleMenu() {
+  document.getElementById("mobileNav").classList.toggle("show");
+}
+</script>
+<script src="app.js"></script>
+</body>
+</html>

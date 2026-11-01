@@ -1,0 +1,470 @@
+{
+  "name": "personal_research_assistant_rag_eval_v1",
+  "description": "Starter RAG retrieval-evaluation dataset for the AWS Personal Research Assistant MVP. Fill relevant_chunk_ids after indexing, using the chunk/document IDs returned by your retriever.",
+  "created_at": "2026-07-09T22:40:10Z",
+  "default_top_k": 25,
+  "eval_k": [
+    5,
+    10,
+    25
+  ],
+  "id_field_note": "Use relevant_chunk_ids for exact recall/precision. source_files and expected_sections are included to help label the ground truth.",
+  "items": [
+    {
+      "id": "rag-eval-001",
+      "question": "What is the current AWS deployment path for the RAG MVP?",
+      "intent": "architecture",
+      "source_files": [
+        "architecture-overview(3).md",
+        "enterprise considerations.md"
+      ],
+      "expected_sections": [
+        "Current Architecture Slice",
+        "Runtime Flow",
+        "Current MVP"
+      ],
+      "relevant_chunk_ids": [
+        "architecture-overview.md#chunk-0"
+      ],
+      "expected_answer_summary": "Browser/API path using Cognito, API Gateway/Lambda/FastAPI, guardrails, retrieval, Bedrock embeddings, FAISS in S3, Bedrock model routing, S3 memory, CloudWatch, optional LangSmith."
+    },
+    {
+      "id": "rag-eval-002",
+      "question": "How does the retrieval pipeline combine BM25 and vector search?",
+      "intent": "retrieval",
+      "source_files": [
+        "rag pipeline.md"
+      ],
+      "expected_sections": [
+        "Retrieval Flow"
+      ],
+      "relevant_chunk_ids": [
+        "rag pipeline.md#chunk-3",
+        "rag pipeline.md#chunk-10",
+        "rag pipeline.md#chunk-12",
+        "rag pipeline.md#chunk-17",
+        "rag pipeline.md#chunk-18",
+        "rag pipeline.md#chunk-25",
+        "rag pipeline.md#chunk-29"
+      ],
+      "expected_answer_summary": "BM25 and vector search run, results are merged, deterministically reranked, and top results are passed to the LLM."
+    },
+    {
+      "id": "rag-eval-003",
+      "question": "What are the default top_k and LLM context size for retrieval?",
+      "intent": "retrieval_config",
+      "source_files": [
+        "rag pipeline.md",
+        "architecture-overview(3).md"
+      ],
+      "expected_sections": [
+        "Retrieval Depth",
+        "LangGraph In The MVP"
+      ],
+      "relevant_chunk_ids": [
+        "rag pipeline.md#chunk-1",
+        "rag pipeline.md#chunk-30"
+      ],
+      "expected_answer_summary": "The system retrieves up to top_k=25 candidates by default and sends the top 5 reranked chunks to the LLM."
+    },
+    {
+      "id": "rag-eval-004",
+      "question": "Why does the MVP use deterministic chunking instead of LLM-based chunking?",
+      "intent": "chunking",
+      "source_files": [
+        "chunking strategy.md",
+        "architecture-overview(3).md"
+      ],
+      "expected_sections": [
+        "Why Chunking Matters",
+        "Implemented Chunking Chain",
+        "Deterministic Chunking"
+      ],
+      "relevant_chunk_ids": [
+        "chunking strategy.md#chunk-2",
+        "chunking strategy.md#chunk-74"
+      ],
+      "expected_answer_summary": "Deterministic chunking is fixed, reproducible, testable, predictable for costs, and avoids hidden variability."
+    },
+    {
+      "id": "rag-eval-005",
+      "question": "What chunking strategies are attempted before sliding-window fallback?",
+      "intent": "chunking",
+      "source_files": [
+        "chunking strategy.md"
+      ],
+      "expected_sections": [
+        "Implemented Chunking Chain"
+      ],
+      "relevant_chunk_ids": [
+        "chunking strategy.md#chunk-8",
+        "chunking strategy.md#chunk-22",
+        "chunking strategy.md#chunk-30",
+        "chunking strategy.md#chunk-38",
+        "chunking strategy.md#chunk-46",
+        "chunking strategy.md#chunk-56"
+      ],
+      "expected_answer_summary": "Whole-document, section-aware, paragraph-aware, sentence-aware, deterministic semantic chunking, then sliding-window fallback."
+    },
+    {
+      "id": "rag-eval-006",
+      "question": "How does chat history work in the current MVP?",
+      "intent": "memory",
+      "source_files": [
+        "chat-history.md",
+        "architecture-overview(3).md"
+      ],
+      "expected_sections": [
+        "Current Behavior",
+        "What Is Stored Today",
+        "LangGraph In The MVP"
+      ],
+      "relevant_chunk_ids": [
+        "chat-history.md#chunk-1",
+        "chat-history.md#chunk-2",
+        "chat-history.md#chunk-11"
+      ],
+      "expected_answer_summary": "The workflow loads prior messages by session_id, retrieves, routes/generates, then saves user and assistant messages."
+    },
+    {
+      "id": "rag-eval-007",
+      "question": "What are the current limitations of chat history?",
+      "intent": "memory_limitations",
+      "source_files": [
+        "chat-history.md"
+      ],
+      "expected_sections": [
+        "What Is Not Yet First-Class History",
+        "Current Limitations"
+      ],
+      "relevant_chunk_ids": [
+        "chat-history.md#chunk-3",
+        "chat-history.md#chunk-6"
+      ],
+      "expected_answer_summary": "It lacks structured timestamps, citations, retrieval scores, hallucination metadata, selected model, searchable history, and conversation-management UX."
+    },
+    {
+      "id": "rag-eval-008",
+      "question": "What guardrails run before and after the LLM call?",
+      "intent": "guardrails",
+      "source_files": [
+        "guardrails(1).md"
+      ],
+      "expected_sections": [
+        "Current Stage",
+        "Runtime Flow",
+        "Implemented Guardrails"
+      ],
+      "relevant_chunk_ids": [
+        "guardrails.md#chunk-0"
+      ],
+      "expected_answer_summary": "A deterministic prompt guardrail runs before retrieval/LLM, and a grounding-risk policy runs after generation."
+    },
+    {
+      "id": "rag-eval-009",
+      "question": "What happens when grounding risk is high?",
+      "intent": "grounding",
+      "source_files": [
+        "guardrails(1).md",
+        "architecture-overview(3).md"
+      ],
+      "expected_sections": [
+        "Implemented Guardrails",
+        "Grounding Scorer Flow",
+        "LangGraph In The MVP"
+      ],
+      "relevant_chunk_ids": [
+        "guardrails.md#chunk-0"
+      ],
+      "expected_answer_summary": "The policy can expose low-confidence metadata, escalate the answer, or return a safe fallback for very high risk."
+    },
+    {
+      "id": "rag-eval-010",
+      "question": "What are the main cost drivers for the MVP?",
+      "intent": "cost",
+      "source_files": [
+        "cost considerations.md"
+      ],
+      "expected_sections": [
+        "Current Deployed Cost Shape",
+        "What The Lambda Actually Does"
+      ],
+      "relevant_chunk_ids": [
+        "cost considerations.md#chunk-2",
+        "cost considerations.md#chunk-6",
+        "cost considerations.md#chunk-8"
+      ],
+      "expected_answer_summary": "Generation tokens, embedding tokens, API/Lambda volume, Cognito MAUs/MFA, S3, and CloudWatch."
+    },
+    {
+      "id": "rag-eval-011",
+      "question": "Which application paths are most expensive and why?",
+      "intent": "cost",
+      "source_files": [
+        "cost considerations.md"
+      ],
+      "expected_sections": [
+        "What The Lambda Actually Does"
+      ],
+      "relevant_chunk_ids": [
+        "cost considerations.md#chunk-6",
+        "cost considerations.md#chunk-8"
+      ],
+      "expected_answer_summary": "Chat and upload are the most expensive because they fan out into retrieval/model calls and parsing/embedding/indexing."
+    },
+    {
+      "id": "rag-eval-012",
+      "question": "What does the CloudWatch cost dashboard show?",
+      "intent": "observability",
+      "source_files": [
+        "cost-dashboard.md"
+      ],
+      "expected_sections": [
+        "What It Shows",
+        "Current Panels",
+        "Why This Is Useful"
+      ],
+      "relevant_chunk_ids": [
+        "cost-dashboard.md#chunk-1",
+        "cost-dashboard.md#chunk-2",
+        "cost-dashboard.md#chunk-3",
+        "cost-dashboard.md#chunk-4"
+      ],
+      "expected_answer_summary": "Request volume, Lambda invocations/errors, API 4xx/5xx, latency, throttles, and integration latency."
+    },
+    {
+      "id": "rag-eval-013",
+      "question": "What metadata is sent to LangSmith?",
+      "intent": "observability",
+      "source_files": [
+        "langsmith-dashboard.md",
+        "langsmith-aws.md"
+      ],
+      "expected_sections": [
+        "What Metadata The MVP Sends",
+        "What Is Sent"
+      ],
+      "relevant_chunk_ids": [
+        "langsmith-dashboard.md#chunk-3",
+        "langsmith-dashboard.md#chunk-4",
+        "langsmith-dashboard.md#chunk-5",
+        "langsmith-dashboard.md#chunk-6",
+        "langsmith-dashboard.md#chunk-7",
+        "langsmith-dashboard.md#chunk-8",
+        "langsmith-dashboard.md#chunk-9"
+      ],
+      "expected_answer_summary": "Metadata-first traces including retrieval counts/scores, selected model, routing reason, hallucination score/action, token estimates, cost, and latency signals."
+    },
+    {
+      "id": "rag-eval-014",
+      "question": "How is the LangSmith API key handled in AWS?",
+      "intent": "secrets",
+      "source_files": [
+        "langsmith-aws.md",
+        "langsmith-dashboard.md"
+      ],
+      "expected_sections": [
+        "Current Design",
+        "Why This Design",
+        "Secret Requirement Before Deploy"
+      ],
+      "relevant_chunk_ids": [
+        "langsmith-aws.md#chunk-12",
+        "langsmith-aws.md#chunk-16",
+        "langsmith-aws.md#chunk-23",
+        "langsmith-aws.md#chunk-40"
+      ],
+      "expected_answer_summary": "The key is stored in AWS Secrets Manager and read by Lambda at runtime; it is not stored in GitHub or plain environment variables."
+    },
+    {
+      "id": "rag-eval-015",
+      "question": "What rate limits are applied to chat and upload routes?",
+      "intent": "rate_limiting",
+      "source_files": [
+        "rate-limiting.md"
+      ],
+      "expected_sections": [
+        "Current Behavior"
+      ],
+      "relevant_chunk_ids": [
+        "rate-limiting.md#chunk-1",
+        "rate-limiting.md#chunk-3",
+        "rate-limiting.md#chunk-4"
+      ],
+      "expected_answer_summary": "Chat is limited per Cognito sub, uploads are limited per Cognito sub, and auth config is limited by client IP/X-Forwarded-For."
+    },
+    {
+      "id": "rag-eval-016",
+      "question": "Why is the current rate limiter not a full production quota system?",
+      "intent": "rate_limiting_limitations",
+      "source_files": [
+        "rate-limiting.md"
+      ],
+      "expected_sections": [
+        "Current Implementation Choice",
+        "Current Limitation"
+      ],
+      "relevant_chunk_ids": [
+        "rate-limiting.md#chunk-5",
+        "rate-limiting.md#chunk-6"
+      ],
+      "expected_answer_summary": "It is process-local and in-memory, so separate Lambda execution environments have separate counters."
+    },
+    {
+      "id": "rag-eval-017",
+      "question": "What vector store does the deployed MVP currently use?",
+      "intent": "vector_store",
+      "source_files": [
+        "vector stores.md",
+        "architecture-overview(3).md"
+      ],
+      "expected_sections": [
+        "Current State",
+        "How Similarity Search Works"
+      ],
+      "relevant_chunk_ids": [
+        "vector stores.md#chunk-0",
+        "vector stores.md#chunk-3",
+        "vector stores.md#chunk-5"
+      ],
+      "expected_answer_summary": "Bedrock Titan embeddings feed a FAISS vector store, with the FAISS index persisted in S3."
+    },
+    {
+      "id": "rag-eval-018",
+      "question": "Why was OpenSearch Serverless removed from the MVP deployment?",
+      "intent": "cost_control",
+      "source_files": [
+        "vector stores.md"
+      ],
+      "expected_sections": [
+        "Current State",
+        "Comparison"
+      ],
+      "relevant_chunk_ids": [
+        "vector stores.md#chunk-6"
+      ],
+      "expected_answer_summary": "It was removed to avoid ongoing OpenSearch Serverless collection charges during MVP testing."
+    },
+    {
+      "id": "rag-eval-019",
+      "question": "When should the MVP move from Lambda to ECS Fargate?",
+      "intent": "enterprise_architecture",
+      "source_files": [
+        "enterprise considerations.md"
+      ],
+      "expected_sections": [
+        "Lambda Timeout Considerations",
+        "Why Move Beyond Lambda"
+      ],
+      "relevant_chunk_ids": [
+        "enterprise considerations.md#chunk-4",
+        "enterprise considerations.md#chunk-5"
+      ],
+      "expected_answer_summary": "When uploads, indexing, longer calls, concurrency, retries, cold starts, or heavier parsing make synchronous Lambda brittle."
+    },
+    {
+      "id": "rag-eval-020",
+      "question": "What role would SQS play in the enterprise architecture?",
+      "intent": "async_processing",
+      "source_files": [
+        "enterprise considerations.md"
+      ],
+      "expected_sections": [
+        "Recommended Enterprise Architecture",
+        "Asynchronous Document Processing With SQS"
+      ],
+      "relevant_chunk_ids": [
+        "enterprise considerations.md#chunk-5"
+      ],
+      "expected_answer_summary": "SQS decouples uploads from background document processing, allowing workers to chunk, embed, index, and update status asynchronously."
+    },
+    {
+      "id": "rag-eval-021",
+      "question": "When would AgentCore become useful for this assistant?",
+      "intent": "agentic_design",
+      "source_files": [
+        "enterprise considerations.md"
+      ],
+      "expected_sections": [
+        "AgentCore Role"
+      ],
+      "relevant_chunk_ids": [
+        "enterprise considerations.md#chunk-8"
+      ],
+      "expected_answer_summary": "AgentCore helps when the assistant needs governed tool use, multi-step actions, structured memory, evaluation, audit trails, and controlled tool access."
+    },
+    {
+      "id": "rag-eval-022",
+      "question": "How does GitHub OIDC avoid storing AWS access keys?",
+      "intent": "deployment_security",
+      "source_files": [
+        "github-oidc.md"
+      ],
+      "expected_sections": [
+        "GitHub OIDC Deployment",
+        "Workflow Deployment Identifiers",
+        "AWS OIDC Provider"
+      ],
+      "relevant_chunk_ids": [
+        "github-oidc.md#chunk-1",
+        "github-oidc.md#chunk-11",
+        "github-oidc.md#chunk-13",
+        "github-oidc.md#chunk-30"
+      ],
+      "expected_answer_summary": "GitHub issues a short-lived OIDC token that AWS validates, allowing the workflow to assume a dedicated deployment role without storing long-lived AWS keys."
+    },
+    {
+      "id": "rag-eval-023",
+      "question": "How should web access be added without confusing users?",
+      "intent": "web_guardrails",
+      "source_files": [
+        "web-access-guardrails.md"
+      ],
+      "expected_sections": [
+        "Recommended Product Principle",
+        "Recommended Retrieval Modes",
+        "Guardrails That Reduce Confusion"
+      ],
+      "relevant_chunk_ids": [
+        "web-access-guardrails.md#chunk-3",
+        "web-access-guardrails.md#chunk-5",
+        "web-access-guardrails.md#chunk-7",
+        "web-access-guardrails.md#chunk-74",
+        "web-access-guardrails.md#chunk-79"
+      ],
+      "expected_answer_summary": "Use private sources first, allow bounded web fallback only when justified, and clearly label answer origin."
+    },
+    {
+      "id": "rag-eval-024",
+      "question": "What are the main risks of adding web access?",
+      "intent": "web_guardrails",
+      "source_files": [
+        "web-access-guardrails.md"
+      ],
+      "expected_sections": [
+        "Main Risks"
+      ],
+      "relevant_chunk_ids": [
+        "web-access-guardrails.md#chunk-7",
+        "web-access-guardrails.md#chunk-73",
+        "web-access-guardrails.md#chunk-90"
+      ],
+      "expected_answer_summary": "User confusion, product drift, higher latency, higher token use, more hallucination surface, and privacy/compliance concerns."
+    },
+    {
+      "id": "rag-eval-025",
+      "question": "What should the enterprise architecture use for metadata and entitlements?",
+      "intent": "enterprise_architecture",
+      "source_files": [
+        "enterprise considerations.md"
+      ],
+      "expected_sections": [
+        "Recommended Enterprise Architecture"
+      ],
+      "relevant_chunk_ids": [
+        "enterprise considerations.md#chunk-5"
+      ],
+      "expected_answer_summary": "DynamoDB or Postgres should store metadata, entitlements, usage, and related application records."
+    }
+  ]
+}

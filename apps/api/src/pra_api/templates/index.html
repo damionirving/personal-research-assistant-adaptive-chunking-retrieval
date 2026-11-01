@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Personal Research Assistant</title>
+  <link rel="icon" href="static/favicon.ico" sizes="any">
+  <link rel="icon" type="image/svg+xml" href="static/favicon.svg">
+  <link rel="icon" type="image/png" href="static/favicon-96x96.png" sizes="96x96">
+  <link rel="apple-touch-icon" href="static/apple-touch-icon.png">
+  <link rel="stylesheet" href="static/app.css?v=timestamp-font-9">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Personal Research Assistant</h1>
+      <div id="status" class="status"></div>
+    </header>
+
+    <section>
+      <h2>Documents</h2>
+      <div class="auth-panel">
+        <button id="sign-in-button" type="button">Sign in</button>
+        <button id="sign-out-button" type="button">Sign out</button>
+        <div id="auth-status" class="meta"></div>
+        <div class="meta auth-note">VOIP Numbers are not recommended for SMS 2FAC.</div>
+      </div>
+      <form id="upload-form">
+        <div id="upload-controls">
+          <label for="file">File</label>
+          <input id="file" name="file" type="file" accept=".txt,.md,.markdown,text/plain,text/markdown">
+          <button id="upload-button" type="submit">Upload</button>
+        </div>
+        <button id="rag-eval-button" type="button" class="secondary-button action-button">Run RAG Performance Test</button>
+        <button id="ragas-eval-button" type="button" class="secondary-button action-button">Run RAGAS Test</button>
+        <button id="stop-ragas-button" type="button" class="secondary-button action-button" hidden>Stop RAGAS Test</button>
+      </form>
+      <div id="rag-eval-progress" class="progress-panel hidden" hidden aria-live="polite">
+        <div id="rag-eval-progress-label" class="progress-label"></div>
+        <div class="progress-track" aria-hidden="true">
+          <div class="progress-bar"></div>
+        </div>
+      </div>
+      <div id="upload-result" class="meta"></div>
+      <div id="rag-eval-result" class="meta"></div>
+      <div id="ragas-eval-result" class="meta"></div>
+      <div id="rag-evaluation-history" class="recent-panel" hidden>
+        <div class="recent-header">
+          <h3>Recent evaluations</h3>
+          <div>
+            <button id="refresh-rag-jobs-button" type="button" class="secondary-button compact-button">Refresh</button>
+            <button id="clear-rag-jobs-button" type="button" class="secondary-button compact-button">Clear</button>
+          </div>
+        </div>
+        <div id="rag-eval-jobs" class="recent-jobs"></div>
+      </div>
+    </section>
+
+    <section class="chat">
+      <div class="chat-header">
+        <h2>Chat</h2>
+        <button id="new-chat-button" type="button" class="secondary-button">New chat</button>
+      </div>
+      <div id="session-id" class="meta session-meta"></div>
+      <div id="messages" class="messages"></div>
+      <form id="chat-form">
+        <label for="message">Message</label>
+        <textarea id="message" name="message"></textarea>
+        <button id="chat-button" type="submit">Send</button>
+      </form>
+    </section>
+  </main>
+  <script src="static/app.js?v=rag-eval-diagnostics-live"></script>
+</body>
+</html>

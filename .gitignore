@@ -1,0 +1,29 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.pytest_tmp*/
+.ruff_cache/
+.mypy_cache/
+
+.env
+.env.*
+!.env.example
+
+.venv/
+venv/
+
+# AWS CDK generated output
+cdk.out/
+infra/cdk.out/
+
+# Common generated directories
+node_modules/
+dist/
+build/
+*.egg-info/
+
+.pra_data/
+.pra_diagnostics/
+
+# Ignore only the root AGENTS.md
+/AGENTS.md

@@ -1,0 +1,308 @@
+flowchart LR
+  %% Detailed current MVP architecture. Keep this source aligned with the
+  %% Admin-Dev Check diagram in docs/architecture-overview.md.
+
+  subgraph Client["Client Layer"]
+    Browser["End User Browser"]
+    FirebaseUI["Firebase Hosting<br/>Tractlytics research-assistant page"]
+    FastAPIUI["FastAPI-served UI<br/>local development / fallback"]
+    LocalStorage["Browser session storage<br/>tokens / PKCE state / evaluation job cache"]
+    EvalButtons["Admin-Dev evaluation controls<br/>feature-flagged buttons"]
+  end
+
+  subgraph Identity["Identity"]
+    HostedUI["Amazon Cognito Hosted UI<br/>Authorization Code + PKCE"]
+    Cognito["Amazon Cognito<br/>retained user pool / app client / JWT issuer"]
+  end
+
+  subgraph Edge["AWS Edge"]
+    APIGW["Amazon API Gateway /prod"]
+  end
+
+  subgraph API["AWS Lambda API Worker<br/>FastAPI app process"]
+    AuthConfig["GET /auth/config<br/>evaluation feature flags"]
+    Health["GET /health"]
+    MetricsRoute["GET /metrics"]
+    Upload["POST /documents/upload"]
+    Chat["POST /chat"]
+    ChatReset["POST /chat/reset"]
+    RagEvalStart["POST /rag/evaluate"]
+    RagEvalStatus["GET /rag/evaluate/{job_id}"]
+    RagasStart["POST /rag/evaluate/ragas"]
+    RagasStatus["GET /rag/evaluate/ragas/{job_id}"]
+    RagasCancel["POST /rag/evaluate/ragas/{job_id}/cancel"]
+    JWTAuth["Cognito JWT auth"]
+    PublicLimiter["Public fixed-window limiter<br/>/auth/config"]
+    UserLimiter["Per-user limiter<br/>chat / upload / evaluations"]
+    Errors["Centralized error handling<br/>trace_id responses"]
+    ObsMiddleware["Observability middleware<br/>trace_id / structured logs"]
+  end
+
+  subgraph ChatWorkflow["LangGraph Chat Workflow"]
+    LoadMemory["load_memory"]
+    TopicReset["topic_shift_check"]
+    Retrieve["retrieve"]
+    RouteModel["route_model + refine_model_route"]
+    Generate["generate"]
+    AnswerShape["Deterministic answer-shape analysis<br/>zero LLM cost"]
+    AnswerRequirements["Question-specific requirements<br/>facts -> rule -> exception -> approval -> decision"]
+    ScoreGrounding["score_grounding"]
+    GroundingPolicy["apply_grounding_policy"]
+    Completeness["Local completeness validation<br/>no semantic truth judging"]
+    Repair["At most one same-context repair<br/>hard maximum: 2 generations"]
+    SaveMemory["save_memory"]
+  end
+
+  subgraph Retrieval["Adaptive Retrieval Pipeline"]
+    QueryPrep["Current-turn query focus"]
+    BM25["BM25-first lexical retrieval<br/>default primary path"]
+    Vector["Vector retrieval<br/>available for fallback"]
+    Confidence["Lightweight confidence<br/>scores / gaps / anchors / source diversity"]
+    HybridFallback["Adaptive hybrid fallback<br/>BM25 + vector"]
+    Preserve["Preserve strong BM25 candidates"]
+    Rerank["Optional rerank hook<br/>disabled by default"]
+    Compress["Deterministic context compression<br/>entities + rule/source family + lexical overlap + dedupe"]
+    ContextTopK["Adaptive final context<br/>5 / 8 / 12-15 chunks"]
+  end
+
+  subgraph Ingestion["Document Ingestion Pipeline"]
+    Parse["Parse uploaded file"]
+    UploadCap["Hard upload cap<br/>413 Payload Too Large"]
+    Dedup["SHA-256 content_hash dedupe"]
+    Chunking["Deterministic chunking chain<br/>adaptive decision with legacy fallback"]
+    ChunkMeta["Chunk metadata<br/>heading / strategy / indices"]
+    Embed["Embedding provider"]
+    Index["Vector indexing"]
+  end
+
+  subgraph Models["Model Routing + LLMs"]
+    DeterministicRouter["Deterministic router<br/>SIMPLE / COMPLEX / AMBIGUOUS"]
+    Gemma3Router["Gemma 3 12B fallback classifier<br/>ambiguous queries only"]
+    Gemma["Amazon Bedrock Runtime<br/>Gemma 3 12B simple primary"]
+    NovaFallback["Amazon Bedrock Runtime<br/>Nova Lite simple fallback"]
+    Gemma4["Amazon Bedrock Mantle<br/>Gemma 4 31B reasoning primary"]
+    MinistralFallback["Amazon Bedrock Runtime<br/>Ministral 14B 3.0 reasoning fallback"]
+    GroundedReply["Answer + citations + scores<br/>semantic / bm25 / rrf / hallucination risk"]
+    RagasRouting["RAGAS answer routing<br/>PRA_RAGAS_USE_NORMAL_MODEL_ROUTING<br/>default false"]
+    RagasGemma["Default: Gemma 3 12B only<br/>RAGAS answer generation"]
+    RagasProduction["Opt-in production answer routing<br/>simple: Gemma 3 -> Nova<br/>complex: Gemma 4 Mantle -> Ministral"]
+    RagasJudge["RAGAS evaluator / judge<br/>Gemma 3 12B unchanged"]
+  end
+
+  subgraph Persistence["Storage / Persistence"]
+    S3Docs["Amazon S3 documents<br/>pra-prod/..."]
+    S3Memory["Amazon S3 memory snapshots"]
+    S3Faiss["Amazon S3 FAISS index + vector metadata"]
+    JobStore["Amazon S3 evaluation job records<br/>partial results + progress"]
+    Dataset["RAG evaluation dataset<br/>local file or S3 testing prefix"]
+  end
+
+  subgraph AsyncEval["Async Retrieval Evaluation"]
+    Queue["Amazon SQS<br/>retrieval evaluation queue"]
+    EvalLambda["AWS Lambda<br/>retrieval evaluation worker"]
+    EvalCorpus["Isolated evaluation corpus"]
+    EvalEmbed["Deterministic local hash embeddings<br/>for eval corpus"]
+    EvalRetrieve["Retrieval-only scoring"]
+    EvalMetrics["Recall / precision / MRR / NDCG<br/>latency / context-loss diagnostics"]
+  end
+
+  subgraph AsyncRagas["Async RAGAS Answer-Quality Evaluation"]
+    RagasQueue["Amazon SQS<br/>RAGAS start queue"]
+    RagasEventSource["SQS event source mapping<br/>starter / retry + DLQ"]
+    RagasStarter["AWS Lambda<br/>RAGAS starter"]
+    RagasStateMachine["AWS Step Functions<br/>bounded step orchestration"]
+    RagasCapacity["AWS Lambda<br/>capacity-status checkpoint<br/>S3 only, no model call"]
+    RagasCapacityWait["2-minute capacity wait<br/>maximum 60 retries"]
+    RagasLambda["AWS Lambda<br/>RAGAS worker / isolated by default"]
+    RagasBatch["Metric-level coordinator<br/>one paid unit per invocation<br/>batch size 1"]
+    RagasGuard["Deadline guard<br/>60s safety reserve<br/>120s metric timeout"]
+    RagasWorkflow["Current RAG workflow<br/>worker-scoped answer routing"]
+    RagasSample["Retrieve once + generate once<br/>persist answer, final contexts, citations"]
+    RagasMetrics["One sequential metric<br/>faithfulness -> precision -> recall<br/>relevancy -> correctness"]
+    RagasProgress["S3 job record<br/>sample state + metric checkpoints"]
+    RagasCancelState["Cancellation state<br/>cancel_requested -> cancelled"]
+  end
+
+  subgraph Observability["Observability"]
+    CWLogs["Amazon CloudWatch Logs"]
+    CWMetrics["Amazon CloudWatch<br/>metrics / dashboard / alarms"]
+    LangSmith["LangSmith traces<br/>normal chat only"]
+    LangSmithChat["Chat workflow state + step traces"]
+    LangSmithEval["Evaluation workers use no-op tracing<br/>RAGAS reporting disabled"]
+    Secrets["AWS Secrets Manager<br/>LANGSMITH_API_KEY secret"]
+  end
+
+  Browser --> FirebaseUI
+  Browser -. local / fallback .-> FastAPIUI
+  FirebaseUI --> LocalStorage
+  FastAPIUI --> LocalStorage
+  FirebaseUI --> EvalButtons
+  EvalButtons -. flags from auth config .-> AuthConfig
+
+  FirebaseUI -->|"sign in / refresh / logout"| HostedUI
+  FastAPIUI -->|"sign in / refresh / logout"| HostedUI
+  HostedUI --> Cognito
+  Cognito -->|"JWTs + Hosted UI session"| HostedUI
+    HostedUI -->|"redirect with auth code"| FirebaseUI
+    HostedUI -->|"redirect with auth code"| FastAPIUI
+  RagasStatus -. "each poll revalidates / silently refreshes ID token" .-> LocalStorage
+  LocalStorage --> RagasCancel
+
+  FirebaseUI -->|"CORS allowlisted requests"| APIGW
+  FastAPIUI -->|"same-origin requests"| APIGW
+  APIGW --> AuthConfig
+  APIGW --> Health
+  APIGW --> MetricsRoute
+  APIGW --> Upload
+  APIGW --> Chat
+  APIGW --> ChatReset
+  APIGW --> RagEvalStart
+  APIGW --> RagEvalStatus
+  APIGW --> RagasStart
+  APIGW --> RagasStatus
+
+  AuthConfig --> PublicLimiter
+  Upload --> JWTAuth
+  Chat --> JWTAuth
+  ChatReset --> JWTAuth
+  RagEvalStart --> JWTAuth
+  RagEvalStatus --> JWTAuth
+  RagasStart --> JWTAuth
+  RagasStatus --> JWTAuth
+  RagasCancel --> JWTAuth
+  JWTAuth -. issuer / JWKS validation .-> Cognito
+  JWTAuth --> UserLimiter
+  PublicLimiter --> Errors
+  UserLimiter --> Errors
+  ObsMiddleware --> Errors
+
+  Chat --> ObsMiddleware
+  Upload --> ObsMiddleware
+  RagEvalStart --> ObsMiddleware
+  RagEvalStatus --> ObsMiddleware
+  RagasStart --> ObsMiddleware
+  RagasStatus --> ObsMiddleware
+  RagasCancel --> ObsMiddleware
+
+  Chat --> LoadMemory
+  LoadMemory --> TopicReset
+  TopicReset --> Retrieve
+  Retrieve --> QueryPrep
+  QueryPrep --> BM25
+  BM25 --> Confidence
+  Confidence -->|"high confidence"| Preserve
+  Confidence -->|"low confidence"| HybridFallback
+  QueryPrep --> Vector
+  Vector --> HybridFallback
+  HybridFallback --> Preserve
+  Preserve --> Rerank
+  Rerank --> Compress
+  Compress --> ContextTopK
+  ContextTopK --> RouteModel
+  RouteModel --> DeterministicRouter
+  RouteModel --> AnswerShape
+  AnswerShape --> AnswerRequirements
+  AnswerRequirements --> Generate
+  DeterministicRouter -->|"clear SIMPLE"| Gemma
+  DeterministicRouter -->|"clear COMPLEX"| Gemma4
+  DeterministicRouter -->|"AMBIGUOUS only"| Gemma3Router
+  Gemma3Router -->|"SIMPLE"| Gemma
+  Gemma3Router -->|"COMPLEX"| Gemma4
+  Gemma3Router -. "invalid / provider error: fail upward" .-> Gemma4
+  Gemma -. exhausted retryable failure .-> NovaFallback
+  Gemma4 -. exhausted retryable Mantle failure .-> MinistralFallback
+  Gemma --> Generate
+  NovaFallback --> Generate
+  Gemma4 --> Generate
+  MinistralFallback --> Generate
+  Generate --> ScoreGrounding
+  ScoreGrounding --> Completeness
+  Completeness --> GroundingPolicy
+  Completeness -. "missing required structure and budget remains" .-> Repair
+  Repair --> GroundingPolicy
+  GroundingPolicy --> SaveMemory
+  SaveMemory --> S3Memory
+  GroundingPolicy --> GroundedReply
+  GroundedReply --> APIGW
+
+  Upload --> UploadCap
+  UploadCap --> Parse
+  Parse --> Dedup
+  Dedup --> S3Docs
+  Dedup --> Chunking
+  Chunking --> ChunkMeta
+  ChunkMeta --> Embed
+  Embed -->|"Titan embeddings in deployed AWS"| Index
+  Index --> S3Faiss
+  Parse -->|"store parsed document"| S3Docs
+
+  RagEvalStart --> JobStore
+  RagEvalStart --> Queue
+  Queue --> EvalLambda
+  EvalLambda --> EvalCorpus
+  EvalCorpus --> Dataset
+  EvalCorpus --> EvalEmbed
+  EvalEmbed --> EvalRetrieve
+  EvalRetrieve --> EvalMetrics
+  EvalMetrics --> JobStore
+  RagEvalStatus --> JobStore
+  BM25 -. retrieval signals .-> EvalRetrieve
+  Vector -. retrieval signals .-> EvalRetrieve
+
+  RagasStart --> JobStore
+  RagasStart --> RagasQueue
+  RagasQueue --> RagasEventSource
+  RagasEventSource --> RagasStarter
+  RagasStarter --> RagasStateMachine
+  RagasStateMachine --> RagasCapacity
+  RagasCapacity --> RagasProgress
+  RagasStateMachine --> RagasLambda
+  RagasLambda -. "429 capacity throttle" .-> RagasCapacityWait
+  RagasCapacityWait --> RagasCapacity
+  RagasCapacityWait --> RagasStateMachine
+  RagasLambda --> RagasBatch
+  RagasBatch --> RagasGuard
+  RagasGuard --> RagasWorkflow
+  RagasWorkflow --> RagasRouting
+  RagasRouting -->|default false| RagasGemma
+  RagasRouting -. explicit true .-> RagasProduction
+  RagasGemma --> RagasSample
+  RagasProduction --> RagasSample
+  RagasSample --> RagasProgress
+  RagasProgress --> RagasMetrics
+  RagasMetrics --> RagasJudge
+  RagasJudge --> RagasProgress
+  RagasProgress --> JobStore
+  RagasProgress -->|"next metric or question"| RagasStateMachine
+  RagasStatus --> JobStore
+  RagasCancel --> RagasCancelState
+  RagasCancelState --> JobStore
+  RagasCancelState -. "worker checks before paid work and continuation" .-> RagasLambda
+
+  AuthConfig --> FirebaseUI
+  AuthConfig --> FastAPIUI
+  RagEvalStatus --> FirebaseUI
+  RagEvalStatus --> FastAPIUI
+  RagasStatus --> FirebaseUI
+  RagasStatus --> FastAPIUI
+  GroundedReply --> FirebaseUI
+  GroundedReply --> FastAPIUI
+
+  ObsMiddleware --> CWLogs
+  ObsMiddleware --> CWMetrics
+  LoadMemory --> LangSmith
+  Retrieve --> LangSmith
+  RouteModel --> LangSmith
+  Generate --> LangSmith
+  ScoreGrounding --> LangSmith
+  GroundingPolicy --> LangSmith
+  SaveMemory --> LangSmith
+  EvalLambda --> CWLogs
+  EvalLambda --> CWMetrics
+  RagasLambda --> CWLogs
+  RagasLambda --> CWMetrics
+  LangSmith --> LangSmithChat
+  EvalLambda -. no detailed reporting .-> LangSmithEval
+  RagasLambda -. no reporting .-> LangSmithEval
+  LangSmithChat --> Secrets
+  LangSmithEval --> Secrets
