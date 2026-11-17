@@ -1,13 +1,10 @@
 name: Deploy
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
-    inputs:
-      confirm_production:
-        description: "Confirm that this run is an administrator-approved production deployment"
-        required: true
-        type: boolean
-        default: true
 
 permissions:
   id-token: write
@@ -29,8 +26,7 @@ jobs:
     environment: production
     if: >-
       github.repository == 'damionirving/personal-research-assistant-adaptive-chunking-retrieval' &&
-      github.ref == 'refs/heads/main' &&
-      inputs.confirm_production == true
+      github.ref == 'refs/heads/main'
 
     steps:
       - name: Check out repository
@@ -82,8 +78,10 @@ jobs:
           set -euo pipefail
           test "${GITHUB_REPOSITORY}" = "damionirving/personal-research-assistant-adaptive-chunking-retrieval"
           test "${GITHUB_REF}" = "refs/heads/main"
-          test "${GITHUB_EVENT_NAME}" = "workflow_dispatch"
-          test "${{ inputs.confirm_production }}" = "true"
+          case "${GITHUB_EVENT_NAME}" in
+            push|workflow_dispatch) ;;
+            *) echo "Unsupported deployment event: ${GITHUB_EVENT_NAME}" && exit 1 ;;
+          esac
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
