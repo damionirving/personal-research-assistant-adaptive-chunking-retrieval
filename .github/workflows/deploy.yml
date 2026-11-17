@@ -7,7 +7,7 @@ on:
         description: "Confirm that this run is an administrator-approved production deployment"
         required: true
         type: boolean
-        default: false
+        default: true
 
 permissions:
   id-token: write
