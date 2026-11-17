@@ -26,6 +26,9 @@ Create `account-parameters.json` at the repository root using the structure belo
   },
   "website": {
     "domain": "<your-domain.com>"
+  },
+  "notifications": {
+    "owner_email": "you@example.com"
   }
 }
 ```
@@ -45,6 +48,10 @@ The PowerShell validator and loader are `scripts/validate-config.ps1` and `scrip
 CDK uses `PRA_AWS_ACCOUNT_ID` and `PRA_AWS_REGION` before the corresponding CDK context values. Supply the existing Cognito pool through `PRA_COGNITO_USER_POOL_ID` or the `cognito_user_pool_id` context value. Missing pool configuration fails rather than silently creating a replacement. This change has not been checked against the live stack; run and review `cdk diff` before deployment.
 
 The manual GitHub deployment workflow reads `AWS_ACCOUNT_ID`, `AWS_REGION`, `AWS_DEPLOY_ROLE_NAME`, `COGNITO_USER_POOL_ID`, `COGNITO_CALLBACK_LOGOUT_URL`, and `WEBSITE_DOMAIN` from GitHub variables and assumes the configured role using OIDC. Its production environment and main-branch checks do not themselves configure GitHub protection or AWS IAM trust. An administrator must verify those settings separately.
+
+The SNS alarm subscription requires an explicit notification address. Set `notifications.owner_email` to a real address in the ignored local JSON; the loader validates it and exports `PRA_COST_ALERT_EMAIL`. Set `COST_ALERT_EMAIL` to the same address in GitHub Actions variables: GitHub runners cannot access the local file. The workflow passes it to both synth and deploy with `-c owner_email=...`; using the same value prevents the reviewed template and deployment from diverging. After deployment, confirm the subscription using the email sent by SNS. A subscription is not active until confirmed.
+
+If an earlier stack is in `ROLLBACK_FAILED` or `DELETE_FAILED`, inspect CloudFormation stack events and resolve the failed resources or deletion before retrying. Do not delete retained resources without reviewing their contents and recovery requirements.
 
 ## Operator Setup
 

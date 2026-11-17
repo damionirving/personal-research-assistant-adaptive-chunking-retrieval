@@ -19,4 +19,8 @@ try {
     $callback = $null
     if (-not [Uri]::TryCreate([string]$config.cognito.callback_logout_url, [UriKind]::Absolute, [ref]$callback) -or $callback.Scheme -ne 'https' -or -not $callback.Host -or $callback.UserInfo -or $callback.Fragment -or $config.cognito.callback_logout_url -match '\s') { throw 'Invalid Cognito callback/logout URL.' }
     if ($config.website.domain -notmatch '^(?=.{1,253}$)(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,63}$') { throw 'Invalid website hostname.' }
-} catch { throw 'Configuration validation failed. Check the required fields and JSON syntax.' }
+    $email = [string]$config.notifications.owner_email
+    if ($email -match '[\r\n]') { throw 'Set notifications.owner_email to a valid, non-placeholder email address.' }
+    $email = $email.Trim()
+    if ($email -notmatch '^[A-Za-z0-9.!#$%&''*+/=?^_`{|}~-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$' -or $email -match '(?i)COST_ALERT_EMAIL|REPLACE_WITH|@example\.(com|org|net)$|placeholder') { throw 'Set notifications.owner_email to a valid, non-placeholder email address.' }
+} catch { throw "Configuration validation failed: $($_.Exception.Message)" }

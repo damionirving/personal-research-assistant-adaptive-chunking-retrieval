@@ -15,5 +15,8 @@
   },
   "website": {
     "domain": "<your-domain.com>"
+  },
+  "notifications": {
+    "owner_email": "you@example.com"
   }
 }

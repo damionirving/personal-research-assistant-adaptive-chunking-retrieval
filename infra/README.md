@@ -59,7 +59,7 @@ The deployed Lambda sets `PRA_EMBEDDING_PROVIDER=bedrock` and defaults to Amazon
 
 The deployed Lambda sets `PRA_VECTOR_STORE_BACKEND=faiss` and stores the active FAISS index plus vector metadata in S3. OpenSearch Serverless is not deployed by this stack so the MVP does not incur OpenSearch Serverless collection charges.
 
-The stack also creates a CloudWatch dashboard and SNS-backed alarms. Set the alert email with the CDK context key `owner_email` or `aws_owner_email` when deploying if you want notifications routed to a different mailbox. If you do not set one, the stack uses the default configured in `pra_infra/stack.py`.
+The stack also creates a CloudWatch dashboard and SNS-backed alarms. A valid alert address is required: configure `notifications.owner_email` in the ignored local account configuration (loaded as `PRA_COST_ALERT_EMAIL`), or supply the CDK context key `owner_email` or `aws_owner_email`. GitHub deployments use the `COST_ALERT_EMAIL` Actions variable. Confirm the SNS subscription through the email sent to that address. See `docs/secure-deployment-configuration.md` for setup and failed-stack recovery guidance.
 
 ## Troubleshoot a Locked `cdk.out`
 

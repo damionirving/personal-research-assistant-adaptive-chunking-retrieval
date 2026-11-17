@@ -61,8 +61,10 @@ jobs:
           PRA_COGNITO_USER_POOL_ID: ${{ vars.COGNITO_USER_POOL_ID }}
           PRA_COGNITO_CALLBACK_LOGOUT_URL: ${{ vars.COGNITO_CALLBACK_LOGOUT_URL }}
           PRA_WEBSITE_DOMAIN: ${{ vars.WEBSITE_DOMAIN }}
+          COST_ALERT_EMAIL: ${{ vars.COST_ALERT_EMAIL }}
         run: |
           set -euo pipefail
+          PYTHONPATH=infra python -c 'import os; from pra_infra.email_validation import validate_owner_email; validate_owner_email(os.environ.get("COST_ALERT_EMAIL"))' || { echo 'Set COST_ALERT_EMAIL to a valid non-placeholder email address.'; exit 1; }
           [[ "$AWS_ACCOUNT_ID" =~ ^[0-9]{12}$ && "$AWS_ACCOUNT_ID" != 000000000000 ]]
           [[ "$AWS_REGION" =~ ^[a-z]{2}(-[a-z0-9]+)+-[0-9]+$ ]]
           [[ "$AWS_DEPLOY_ROLE_NAME" =~ ^[A-Za-z0-9+=,.@_-]{1,64}$ ]]
@@ -96,7 +98,8 @@ jobs:
           PRA_COGNITO_USER_POOL_ID: ${{ vars.COGNITO_USER_POOL_ID }}
           PRA_COGNITO_CALLBACK_LOGOUT_URL: ${{ vars.COGNITO_CALLBACK_LOGOUT_URL }}
           PRA_WEBSITE_DOMAIN: ${{ vars.WEBSITE_DOMAIN }}
-        run: cdk synth -c account=${{ env.AWS_ACCOUNT_ID }} -c region=${{ env.AWS_REGION }}
+          COST_ALERT_EMAIL: ${{ vars.COST_ALERT_EMAIL }}
+        run: cdk synth -c account=${{ env.AWS_ACCOUNT_ID }} -c region=${{ env.AWS_REGION }} -c owner_email="$COST_ALERT_EMAIL"
 
       - name: CDK deploy
         working-directory: infra
@@ -104,4 +107,5 @@ jobs:
           PRA_COGNITO_USER_POOL_ID: ${{ vars.COGNITO_USER_POOL_ID }}
           PRA_COGNITO_CALLBACK_LOGOUT_URL: ${{ vars.COGNITO_CALLBACK_LOGOUT_URL }}
           PRA_WEBSITE_DOMAIN: ${{ vars.WEBSITE_DOMAIN }}
-        run: cdk deploy --require-approval never --force -c account=${{ env.AWS_ACCOUNT_ID }} -c region=${{ env.AWS_REGION }}
+          COST_ALERT_EMAIL: ${{ vars.COST_ALERT_EMAIL }}
+        run: cdk deploy --require-approval never --force -c account=${{ env.AWS_ACCOUNT_ID }} -c region=${{ env.AWS_REGION }} -c owner_email="$COST_ALERT_EMAIL"

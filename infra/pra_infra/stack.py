@@ -27,6 +27,7 @@ from aws_cdk import aws_sqs as sqs
 from aws_cdk import aws_stepfunctions as sfn
 from aws_cdk import aws_stepfunctions_tasks as sfn_tasks
 from constructs import Construct
+from pra_infra.email_validation import validate_owner_email
 
 
 def _context_bool(scope: Construct, key: str, default: bool) -> str:
@@ -146,10 +147,10 @@ class PersonalResearchAssistantStack(Stack):
             self.node.try_get_context("bedrock_reasoning_fallback_model_id")
             or "mistral.ministral-3-14b-instruct"
         )
-        owner_email = (
+        owner_email = validate_owner_email(
             self.node.try_get_context("owner_email")
             or self.node.try_get_context("aws_owner_email")
-            or "[REDACTED_EMAIL]"
+            or os.environ.get("PRA_COST_ALERT_EMAIL")
         )
         ragas_enabled = _context_bool(self, "ragas_enabled", True)
         rag_evaluation_enabled = _context_bool(self, "rag_evaluation_enabled", True)

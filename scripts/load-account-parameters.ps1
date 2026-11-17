@@ -8,3 +8,4 @@ $env:PRA_CDK_QUALIFIER = $config.cdk.qualifier
 $env:PRA_COGNITO_USER_POOL_ID = $config.cognito.user_pool_id
 $env:PRA_COGNITO_CALLBACK_LOGOUT_URL = $config.cognito.callback_logout_url
 $env:PRA_WEBSITE_DOMAIN = $config.website.domain
+$env:PRA_COST_ALERT_EMAIL = ([string]$config.notifications.owner_email).Trim()
