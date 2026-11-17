@@ -1,4 +1,7 @@
+import os
+import re
 from pathlib import Path
+from urllib.parse import urlsplit
 
 from aws_cdk import (
     BundlingOptions,
@@ -66,9 +69,11 @@ class PersonalResearchAssistantStack(Stack):
             prune=False,
         )
         cognito_user_pool_id = (
-            self.node.try_get_context("cognito_user_pool_id")
-            or "us-east-1_IxEu5C7oJ"
+            os.environ.get("PRA_COGNITO_USER_POOL_ID")
+            or self.node.try_get_context("cognito_user_pool_id")
         )
+        if not cognito_user_pool_id:
+            raise ValueError("Set PRA_COGNITO_USER_POOL_ID or CDK context cognito_user_pool_id to the existing user pool ID.")
         if cognito_user_pool_id:
             user_pool = cognito.UserPool.from_user_pool_id(
                 self,
@@ -101,6 +106,15 @@ class PersonalResearchAssistantStack(Stack):
             self.node.try_get_context("hosted_ui_callback_url")
             or "https://svr1n7ghpk.execute-api.us-east-1.amazonaws.com/prod/"
         )
+        website_domain = os.environ.get("PRA_WEBSITE_DOMAIN") or self.node.try_get_context("website_domain")
+        if not website_domain or not re.fullmatch(r"(?=.{1,253}$)(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,63}", website_domain):
+            raise ValueError("Set PRA_WEBSITE_DOMAIN or website_domain to a valid website hostname.")
+        callback_logout_url = os.environ.get("PRA_COGNITO_CALLBACK_LOGOUT_URL") or self.node.try_get_context("cognito_callback_logout_url")
+        parsed_callback = urlsplit(callback_logout_url or "")
+        if (parsed_callback.scheme != "https" or not parsed_callback.hostname or
+                parsed_callback.username or parsed_callback.password or parsed_callback.fragment or
+                any(char.isspace() for char in callback_logout_url or "")):
+            raise ValueError("Set PRA_COGNITO_CALLBACK_LOGOUT_URL or cognito_callback_logout_url to a valid HTTPS URL.")
         hosted_ui_callback_urls = list(
             dict.fromkeys(
                 [
@@ -108,10 +122,7 @@ class PersonalResearchAssistantStack(Stack):
                     "http://localhost:8000/",
                     "http://localhost:5000/research-assistant/",
                     "http://127.0.0.1:5000/research-assistant/",
-                    "https://<your-domain.com>/research-assistant/",
-                    "https://www.<your-domain.com>/research-assistant/",
-                    "https://tractlyticswebsite.web.app/research-assistant/",
-                    "https://tractlyticswebsite.firebaseapp.com/research-assistant/",
+                    callback_logout_url,
                 ]
             )
         )
@@ -289,6 +300,7 @@ class PersonalResearchAssistantStack(Stack):
                 "PRA_LOG_FORMAT": "json",
                 "PRA_LOG_LEVEL": "INFO",
                 "PRA_API_ROOT_PATH": "/prod",
+                "PRA_ALLOWED_CORS_ORIGINS": f"http://localhost:5000,http://127.0.0.1:5000,https://{website_domain}",
                 "PRA_AUTH_PROVIDER": "cognito",
                 "PRA_AWS_REGION": Stack.of(self).region,
                 "PRA_COGNITO_USER_POOL_ID": user_pool.user_pool_id,

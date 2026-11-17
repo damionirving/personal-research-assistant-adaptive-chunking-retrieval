@@ -11,7 +11,7 @@ This repository contains an intentionally lightweight local experience and an AW
 | Product reviewers and nontechnical readers | Start with [Project Overview](#project-overview), [Current State](#current-state), [MVP Architecture](#mvp-architecture), and [What Is Not Implemented Yet](#what-is-not-implemented-yet). |
 | Developers | Continue to [Repository Layout](#repository-layout), [Local Setup](#local-setup), [Local Usage](#local-usage), and [Tests](#tests). |
 | AI/RAG engineers | Review [Model Routing and Fallbacks](#model-routing-and-fallbacks), [How Retrieval Works Today](#how-retrieval-works-today), and the [Project Docs](#project-docs). |
-| Cloud and platform engineers | See [AWS Deployment](#aws-deployment), [Firebase-Hosted Research Assistant Integration](#firebase-hosted-research-assistant-integration), and [Environment Variables](#environment-variables). |
+| Cloud and platform engineers | See [AWS Deployment](#aws-deployment), [Secure Deployment Configuration](docs/secure-deployment-configuration.md), [Firebase-Hosted Research Assistant Integration](#firebase-hosted-research-assistant-integration), and [Environment Variables](#environment-variables). |
 
 ## Contents
 
@@ -30,6 +30,7 @@ This repository contains an intentionally lightweight local experience and an AW
 - [Tests](#tests)
 - [Docker](#docker)
 - [AWS Deployment](#aws-deployment)
+- [Secure Deployment Configuration](docs/secure-deployment-configuration.md)
 - [Firebase-Hosted Research Assistant Integration](#firebase-hosted-research-assistant-integration)
 - [Environment Variables](#environment-variables)
 - [Development Notes](#development-notes)
@@ -92,7 +93,7 @@ The application currently includes:
 
 - FastAPI API with health, document upload, chat, metrics, and OpenAPI docs.
 - API-served browser front end retained for local development and fallback access.
-- Firebase-hosted Tractlytics Research Assistant page in `data/research-assistant/` for the current website integration path.
+- Firebase-hosted <your-domain.com> Research Assistant page in `data/research-assistant/` for the current website integration path.
 - LangGraph chat workflow.
 - Local upload pipeline: parse, store, chunk, embed, and index.
 - Deterministic Phase 13 chunking decision chain: whole-document, section-aware, paragraph-aware, sentence-aware, semantic, then fixed sliding-window fallback.
@@ -130,7 +131,7 @@ The deployed stack stores document and chat-memory JSON snapshots in S3 under th
 
 ## MVP Architecture
 
-The maintained architecture source is `docs/mvp-architecture.mmd`. The PNG below is an AI-generated visual summary informed by that source, not a direct Mermaid render. The application uses the Firebase-hosted Tractlytics page, retained Cognito pool, Lambda/API Gateway, BM25-first adaptive retrieval, Bedrock model routing, FAISS + S3 persistence, and separate asynchronous retrieval-performance and RAGAS evaluation paths. The API-served FastAPI UI also supports local development.
+The maintained architecture source is `docs/mvp-architecture.mmd`. The PNG below is an AI-generated visual summary informed by that source, not a direct Mermaid render. The application uses the Firebase-hosted <your-domain.com> page, retained Cognito pool, Lambda/API Gateway, BM25-first adaptive retrieval, Bedrock model routing, FAISS + S3 persistence, and separate asynchronous retrieval-performance and RAGAS evaluation paths. The API-served FastAPI UI also supports local development.
 
 The architecture now explicitly shows the API process plus two separate asynchronous evaluation paths:
 
@@ -216,8 +217,8 @@ personal-research-assistant/
     requirements.txt         CDK Python dependencies
   data/
     research-assistant/
-      index.html            Firebase-hosted Tractlytics page shell for the MVP
-      app.js                Firebase-hosted Tractlytics page logic for auth, chat, upload, and RAG evaluation
+      index.html            Firebase-hosted <your-domain.com> page shell for the MVP
+      app.js                Firebase-hosted <your-domain.com> page logic for auth, chat, upload, and RAG evaluation
   docs/
     architecture-overview.md Phase architecture notes and diagrams
     guardrails.md            Current guardrail behavior notes
@@ -255,6 +256,8 @@ personal-research-assistant/
 | [Enterprise Considerations](docs/enterprise%20considerations.md) | Roadmap from the current MVP to a production enterprise architecture. |
 | [Guardrails](docs/guardrails.md) | Current guardrail behavior and limitations. |
 | [GitHub OIDC](docs/github-oidc.md) | GitHub Actions deployment identity and AWS OIDC setup. |
+| [Secure Deployment Configuration](docs/secure-deployment-configuration.md) | Deployment configuration, security controls, and implementation status. |
+| [Windows CLI Toolchain](docs/personal-research-assistant-windows-cli-toolchain.md) | Windows prerequisites and command-line setup for development and AWS CDK. |
 | [CDK Recursive Cleanup Chat](docs/cdk-recursive-cleanup-chat.md) | Windows cleanup guidance and guardrails for recursive generated `cdk.out` directories. |
 | [Vector Stores](docs/vector%20stores.md) | Current vector-store choice and comparison with FAISS, OpenSearch Serverless, and pgvector. |
 | [Northstar Meridian Scenario](docs/test-corpus/scenario-northstar-meridian.md) | Fictional private source document for upload and retrieval testing. |
@@ -631,7 +634,7 @@ Cognito Hosted UI styling and OAuth flow configuration are managed in CDK. Chang
 
 ## Firebase-Hosted Research Assistant Integration
 
-The repo also includes a Tractlytics-hosted front-end copy of the assistant in:
+The repo also includes a <your-domain.com>-hosted front-end copy of the assistant in:
 
 - [data/research-assistant/index.html](data/research-assistant/index.html)
 - [data/research-assistant/app.js](data/research-assistant/app.js)
@@ -641,18 +644,12 @@ Those files are now the main production website integration path for the assista
 - `http://localhost:5000`
 - `http://127.0.0.1:5000`
 - `https://<your-domain.com>`
-- `https://www.<your-domain.com>`
-- `https://tractlyticswebsite.web.app`
-- `https://tractlyticswebsite.firebaseapp.com`
 
 Because the external page signs in through Cognito Hosted UI and returns to its own page URL, the Cognito app client must also allow these callback and logout URLs:
 
 - `http://localhost:5000/research-assistant/`
 - `http://127.0.0.1:5000/research-assistant/`
 - `https://<your-domain.com>/research-assistant/`
-- `https://www.<your-domain.com>/research-assistant/`
-- `https://tractlyticswebsite.web.app/research-assistant/`
-- `https://tractlyticswebsite.firebaseapp.com/research-assistant/`
 
 The existing API-served assistant URLs still remain valid too:
 
@@ -663,7 +660,7 @@ In practice, the hosted split is now:
 
 ```text
 Firebase Hosting:
-  serves the Tractlytics research assistant page
+  serves the <your-domain.com> research assistant page
   runs the browser-side Cognito PKCE flow
   calls the AWS API over CORS
 
@@ -709,7 +706,7 @@ The tables below separate application, authentication, storage, observability, m
 | `PRA_LOG_LEVEL` | `INFO` | Root log level. |
 | `PRA_LOG_FORMAT` | `json` | `json` or `console`. |
 | `PRA_API_ROOT_PATH` | empty | API Gateway stage prefix, such as `/prod`. |
-| `PRA_ALLOWED_CORS_ORIGINS` | `http://localhost:5000,http://127.0.0.1:5000,https://<your-domain.com>,https://www.<your-domain.com>` | Exact browser origins allowed to call the API from the Firebase-hosted page and local front-end testing. |
+| `PRA_ALLOWED_CORS_ORIGINS` | `http://localhost:5000,http://127.0.0.1:5000,https://<your-domain.com>` | Exact browser origins allowed to call the API from the hosted page and local front-end testing. |
 | `PRA_AUTH_PROVIDER` | `cognito` | Active auth provider. Cognito is the Phase 9 provider. |
 | `PRA_AWS_REGION` | `us-east-1` | AWS region for deployed runtime configuration. |
 

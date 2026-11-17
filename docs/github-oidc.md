@@ -23,13 +23,16 @@ Production deployment is intentionally manual. GitHub Actions runs the productio
 
 ## Workflow Deployment Identifiers
 
-The deploy workflow hardcodes these non-secret deployment identifiers:
+Configure these non-secret variables in the protected production environment:
 
 | Variable | Value |
 | --- | --- |
-| `AWS_ACCOUNT_ID` | `000000000000` |
-| `AWS_REGION` | `us-east-1` |
-| `AWS_DEPLOY_ROLE_ARN` | `arn:aws:iam::000000000000:role/GitHubPersonalResearchAssistantDeployRole` |
+| `AWS_ACCOUNT_ID` | `<AWS_ACCOUNT_ID>` |
+| `AWS_REGION` | `<AWS_REGION>` |
+| `AWS_DEPLOY_ROLE_NAME` | `<GITHUB_DEPLOY_ROLE_NAME>` |
+| `COGNITO_USER_POOL_ID` | `<COGNITO_USER_POOL_ID>` |
+| `COGNITO_CALLBACK_LOGOUT_URL` | `https://<your-domain.com>/research-assistant/` |
+| `WEBSITE_DOMAIN` | `<your-domain.com>` |
 
 These values identify the target account, region, and role name. They are not AWS credentials. No `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, or `AWS_SESSION_TOKEN` is stored in GitHub.
 
@@ -133,11 +136,11 @@ aws iam put-role-policy --role-name GitHubPersonalResearchAssistantDeployRole --
 GitHub OIDC deployment expects the account and region to already be bootstrapped:
 
 ```cmd
-cd C:\Users\damio\OneDrive\Documents\Tractlytics\CODE\2026\personal-research-assistant\infra
+cd C:\path\to\your\project\infra
 cdk.cmd bootstrap aws://000000000000/us-east-1 --profile admin-programatic
 ```
 
-This has already been done for the current project. Only rerun bootstrap when the bootstrap stack is missing, outdated, or intentionally changed.
+An administrator must verify the bootstrap stack independently before deployment.
 
 ## Run A Deployment
 

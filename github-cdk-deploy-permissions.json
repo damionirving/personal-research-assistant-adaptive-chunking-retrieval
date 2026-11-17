@@ -1,0 +1,21 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AssumeCDKBootstrapRoles",
+      "Effect": "Allow",
+      "Action": "sts:AssumeRole",
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "iam:ResourceTag/aws-cdk:bootstrap-role": [
+            "deploy",
+            "file-publishing",
+            "image-publishing",
+            "lookup"
+          ]
+        }
+      }
+    }
+  ]
+}

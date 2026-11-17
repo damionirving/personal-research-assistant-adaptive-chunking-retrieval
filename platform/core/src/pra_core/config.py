@@ -18,11 +18,7 @@ class Settings(BaseSettings):
     api_root_path: str = ""
     allowed_cors_origins: str = (
         "http://localhost:5000,"
-        "http://127.0.0.1:5000,"
-        "https://<your-domain.com>,"
-        "https://www.<your-domain.com>,"
-        "https://tractlyticswebsite.web.app,"
-        "https://tractlyticswebsite.firebaseapp.com"
+        "http://127.0.0.1:5000"
     )
     auth_provider: Literal["cognito"] = "cognito"
     aws_region: str = "us-east-1"

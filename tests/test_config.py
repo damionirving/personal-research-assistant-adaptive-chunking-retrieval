@@ -13,19 +13,11 @@ def test_settings_accept_phase_zero_defaults() -> None:
     assert settings.api_root_path == ""
     assert settings.allowed_cors_origins == (
         "http://localhost:5000,"
-        "http://127.0.0.1:5000,"
-        "https://<your-domain.com>,"
-        "https://www.<your-domain.com>,"
-        "https://tractlyticswebsite.web.app,"
-        "https://tractlyticswebsite.firebaseapp.com"
+        "http://127.0.0.1:5000"
     )
     assert settings.cors_allowed_origins == (
         "http://localhost:5000",
         "http://127.0.0.1:5000",
-        "https://<your-domain.com>",
-        "https://www.<your-domain.com>",
-        "https://tractlyticswebsite.web.app",
-        "https://tractlyticswebsite.firebaseapp.com",
     )
     assert settings.auth_provider == "cognito"
     assert settings.aws_region == "us-east-1"

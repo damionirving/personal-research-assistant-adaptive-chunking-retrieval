@@ -417,9 +417,9 @@ It does not:
 The same async evaluation path is available from both front ends:
 
 - the API-served FastAPI browser UI
-- the Firebase-hosted Tractlytics page in `data/research-assistant/`
+- the Firebase-hosted <your-domain.com> page in `data/research-assistant/`
 
-Both use the same authenticated AWS endpoints, job polling model, and result summaries. The Firebase page calls those endpoints cross-origin through the configured Tractlytics/local CORS allowlist.
+Both use the same authenticated AWS endpoints, job polling model, and result summaries. The Firebase page calls those endpoints cross-origin through the configured <your-domain.com>/local CORS allowlist.
 
 ### Dataset Location
 

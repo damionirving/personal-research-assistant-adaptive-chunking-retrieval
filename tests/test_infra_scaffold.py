@@ -43,7 +43,8 @@ def test_cdk_stack_declares_required_phase_two_resources() -> None:
     assert "cognito.UserPool" in stack_source
     assert "cognito.UserPool.from_user_pool_id" in stack_source
     assert '"cognito_user_pool_id"' in stack_source
-    assert '"us-east-1_IxEu5C7oJ"' in stack_source
+    assert '"PRA_COGNITO_USER_POOL_ID"' in stack_source
+    assert "Set PRA_COGNITO_USER_POOL_ID" in stack_source
     assert '"cognito_domain_prefix"' in stack_source
     assert "PRA_AUTH_PROVIDER" in stack_source
     assert "PRA_COGNITO_CLIENT_ID" in stack_source
@@ -141,10 +142,9 @@ def test_cdk_stack_declares_required_phase_two_resources() -> None:
     assert "refresh_token_validity=Duration.days(30)" in stack_source
     assert "http://localhost:5000/research-assistant/" in stack_source
     assert "http://127.0.0.1:5000/research-assistant/" in stack_source
-    assert "https://<your-domain.com>/research-assistant/" in stack_source
-    assert "https://www.<your-domain.com>/research-assistant/" in stack_source
-    assert "https://tractlyticswebsite.web.app/research-assistant/" in stack_source
-    assert "https://tractlyticswebsite.firebaseapp.com/research-assistant/" in stack_source
+    assert '"PRA_COGNITO_CALLBACK_LOGOUT_URL"' in stack_source
+    assert 'callback_logout_url,' in stack_source
+    assert '"PRA_ALLOWED_CORS_ORIGINS"' in stack_source
     assert "DeploymentAutomation" in stack_source
 
 

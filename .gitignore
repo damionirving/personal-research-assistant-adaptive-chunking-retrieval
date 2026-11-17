@@ -8,6 +8,8 @@ __pycache__/
 .env
 .env.*
 !.env.example
+/account-parameters.json
+.generated/
 
 .venv/
 venv/
@@ -27,3 +29,6 @@ build/
 
 # Ignore only the root AGENTS.md
 /AGENTS.md
+
+#Ignore docs offline with sensitive data needed for Dev
+/docs\ offline/

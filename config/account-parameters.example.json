@@ -1,0 +1,19 @@
+{
+  "aws": {
+    "account_id": "<AWS_ACCOUNT_ID>",
+    "region": "<AWS_REGION>"
+  },
+  "github": {
+    "deploy_role_name": "<GITHUB_DEPLOY_ROLE_NAME>"
+  },
+  "cdk": {
+    "qualifier": "<CDK_QUALIFIER>"
+  },
+  "cognito": {
+    "user_pool_id": "<COGNITO_USER_POOL_ID>",
+    "callback_logout_url": "https://<your-domain.com>/research-assistant/"
+  },
+  "website": {
+    "domain": "<your-domain.com>"
+  }
+}

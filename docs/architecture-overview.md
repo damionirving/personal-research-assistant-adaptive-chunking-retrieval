@@ -2,7 +2,7 @@
 
 ## Current Architecture Slice
 
-Phase 16 keeps the deterministic chunking strategy, reasoning fallback, and MVP rate limiting, and adds conversational response refinement. The deployed stack still uses Bedrock embeddings with a FAISS-backed vector index persisted in S3, while both mock and Bedrock responses are now tuned to sound more natural when the retrieved documents do not support the user's request well. The main website integration path is now the Firebase-hosted Tractlytics page in `data/research-assistant/`, which calls the AWS API directly over the configured CORS allowlist. CDK imports the retained Cognito pool `us-east-1_IxEu5C7oJ` by default and creates the current app client and Hosted UI domain against it.
+Phase 16 keeps the deterministic chunking strategy, reasoning fallback, and MVP rate limiting, and adds conversational response refinement. The deployed stack still uses Bedrock embeddings with a FAISS-backed vector index persisted in S3, while both mock and Bedrock responses are now tuned to sound more natural when the retrieved documents do not support the user's request well. The main website integration path is now the Firebase-hosted <your-domain.com> page in `data/research-assistant/`, which calls the AWS API directly over the configured CORS allowlist. CDK imports the configured existing Cognito pool and creates the app client and Hosted UI domain against it.
 
 The deployed runtime should now be thought of as two product/evaluation paths plus RAGAS orchestration helpers:
 
@@ -36,7 +36,7 @@ Deployed AWS:
 
 ```mermaid
 flowchart LR
-    Browser["End user browser"] --> Firebase["Firebase-hosted Tractlytics page"]
+    Browser["End user browser"] --> Firebase["Firebase-hosted <your-domain.com> page"]
     Browser -. local/fallback .-> Legacy["FastAPI-served UI"]
     Firebase --> Cognito["Cognito Hosted UI code + PKCE"]
     Legacy --> Cognito
@@ -82,7 +82,7 @@ flowchart LR
     Workflow --> Scores["Similarity + Hallucination Risk Metadata"]
 ```
 
-The Firebase-hosted page and the FastAPI-served fallback UI both talk to the same backend routes and use the same Cognito Hosted UI PKCE flow. The Firebase page depends on the configured CORS allowlist plus Cognito callback/logout URLs that point back to `/research-assistant/` on the Tractlytics domains and local port-5000 paths. During long-running RAGAS polling, both pages revalidate the session before each status request and silently refresh an expiring ID token when a valid Cognito refresh token is available. This avoids unnecessary re-login prompts while preserving a clear sign-in prompt for invalid sessions.
+The Firebase-hosted page and the FastAPI-served fallback UI both talk to the same backend routes and use the same Cognito Hosted UI PKCE flow. The Firebase page depends on the configured CORS allowlist plus Cognito callback/logout URLs that point back to `/research-assistant/` on the <your-domain.com> domains and local port-5000 paths. During long-running RAGAS polling, both pages revalidate the session before each status request and silently refresh an expiring ID token when a valid Cognito refresh token is available. This avoids unnecessary re-login prompts while preserving a clear sign-in prompt for invalid sessions.
 
 RAGAS worker dispatch is deliberately small and observable. The API writes a
 job record and publishes its `job_id` to `RagasEvaluationQueue`; the queue

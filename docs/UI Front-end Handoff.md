@@ -13,7 +13,7 @@ This document lists the safe front-end assets to hand to a UI developer who need
 - [data/research-assistant/index.html](../data/research-assistant/index.html)
 - [data/research-assistant/app.js](../data/research-assistant/app.js)
 
-The `data/research-assistant/` pair is the current Firebase-hosted Tractlytics integration. `index.html` provides the page shell and controls, while `app.js` wires sign-in, upload, chat, RAG evaluation, recent-evaluation polling, and status rendering to the deployed AWS API.
+The `data/research-assistant/` pair is the current Firebase-hosted <your-domain.com> integration. `index.html` provides the page shell and controls, while `app.js` wires sign-in, upload, chat, RAG evaluation, recent-evaluation polling, and status rendering to the deployed AWS API.
 
 ## What not to share
 
@@ -43,20 +43,14 @@ The `data/research-assistant/` pair is the current Firebase-hosted Tractlytics i
 
 The handoff should be treated as a visual and interaction reference only. The UI developer can connect it to their own backend endpoints or mock data sources, but the AWS deployment code, Lambda handlers, and infrastructure wiring should stay out of the handoff package.
 
-For the current Tractlytics-hosted integration, the AWS API must allow these browser origins through CORS:
+For the current <your-domain.com>-hosted integration, the AWS API must allow these browser origins through CORS:
 
 - `http://localhost:5000`
 - `http://127.0.0.1:5000`
 - `https://<your-domain.com>`
-- `https://www.<your-domain.com>`
-- `https://tractlyticswebsite.web.app`
-- `https://tractlyticswebsite.firebaseapp.com`
 
 Because Cognito redirects back to the hosted page itself, the Cognito app client must also allow these callback and logout URLs:
 
 - `http://localhost:5000/research-assistant/`
 - `http://127.0.0.1:5000/research-assistant/`
 - `https://<your-domain.com>/research-assistant/`
-- `https://www.<your-domain.com>/research-assistant/`
-- `https://tractlyticswebsite.web.app/research-assistant/`
-- `https://tractlyticswebsite.firebaseapp.com/research-assistant/`

@@ -4,7 +4,7 @@ flowchart LR
 
   subgraph Client["Client Layer"]
     Browser["End User Browser"]
-    FirebaseUI["Firebase Hosting<br/>Tractlytics research-assistant page"]
+    FirebaseUI["Firebase Hosting<br/><your-domain.com> research-assistant page"]
     FastAPIUI["FastAPI-served UI<br/>local development / fallback"]
     LocalStorage["Browser session storage<br/>tokens / PKCE state / evaluation job cache"]
     EvalButtons["Admin-Dev evaluation controls<br/>feature-flagged buttons"]

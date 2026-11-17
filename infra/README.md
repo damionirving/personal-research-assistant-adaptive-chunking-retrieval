@@ -39,10 +39,10 @@ cdk deploy
 
 The CDK app bundles the repository root into a Lambda asset and installs `requirements-lambda.txt` into that asset.
 
-By default, the stack imports the retained Cognito pool `us-east-1_IxEu5C7oJ`,
-then creates its app client and Hosted UI domain against that pool. Override
-`cognito_user_pool_id` or `cognito_domain_prefix` with CDK context when using a
-different existing pool or domain prefix.
+The stack requires the existing Cognito pool ID via `PRA_COGNITO_USER_POOL_ID`
+or the `cognito_user_pool_id` CDK context. It imports that pool and creates its
+app client and Hosted UI domain against it. Review the CDK diff before deployment.
+See [Secure Deployment Configuration](../docs/secure-deployment-configuration.md).
 
 The Cognito Hosted UI color treatment is defined in `pra_infra/stack.py` as a `CfnUserPoolUICustomizationAttachment`. The app client uses authorization code grant with PKCE, 1-hour ID/access tokens, and 30-day refresh tokens. Deploy the stack again after branding, callback URL, OAuth flow, or token lifetime changes.
 
