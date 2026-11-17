@@ -21,9 +21,6 @@ env:
   AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
   AWS_REGION: ${{ vars.AWS_REGION }}
   AWS_DEPLOY_ROLE_NAME: ${{ vars.AWS_DEPLOY_ROLE_NAME }}
-  PRA_COGNITO_USER_POOL_ID: ${{ vars.COGNITO_USER_POOL_ID }}
-  PRA_COGNITO_CALLBACK_LOGOUT_URL: ${{ vars.COGNITO_CALLBACK_LOGOUT_URL }}
-  PRA_WEBSITE_DOMAIN: ${{ vars.WEBSITE_DOMAIN }}
 
 jobs:
   deploy:
@@ -64,6 +61,10 @@ jobs:
       - name: Validate deployment variables
         id: deployment
         shell: bash
+        env:
+          PRA_COGNITO_USER_POOL_ID: ${{ vars.COGNITO_USER_POOL_ID }}
+          PRA_COGNITO_CALLBACK_LOGOUT_URL: ${{ vars.COGNITO_CALLBACK_LOGOUT_URL }}
+          PRA_WEBSITE_DOMAIN: ${{ vars.WEBSITE_DOMAIN }}
         run: |
           set -euo pipefail
           [[ "$AWS_ACCOUNT_ID" =~ ^[0-9]{12}$ && "$AWS_ACCOUNT_ID" != 000000000000 ]]
@@ -93,8 +94,16 @@ jobs:
 
       - name: CDK synth
         working-directory: infra
+        env:
+          PRA_COGNITO_USER_POOL_ID: ${{ vars.COGNITO_USER_POOL_ID }}
+          PRA_COGNITO_CALLBACK_LOGOUT_URL: ${{ vars.COGNITO_CALLBACK_LOGOUT_URL }}
+          PRA_WEBSITE_DOMAIN: ${{ vars.WEBSITE_DOMAIN }}
         run: cdk synth -c account=${{ env.AWS_ACCOUNT_ID }} -c region=${{ env.AWS_REGION }}
 
       - name: CDK deploy
         working-directory: infra
+        env:
+          PRA_COGNITO_USER_POOL_ID: ${{ vars.COGNITO_USER_POOL_ID }}
+          PRA_COGNITO_CALLBACK_LOGOUT_URL: ${{ vars.COGNITO_CALLBACK_LOGOUT_URL }}
+          PRA_WEBSITE_DOMAIN: ${{ vars.WEBSITE_DOMAIN }}
         run: cdk deploy --require-approval never --force -c account=${{ env.AWS_ACCOUNT_ID }} -c region=${{ env.AWS_REGION }}
