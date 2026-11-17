@@ -32,3 +32,5 @@ build/
 
 #Ignore docs offline with sensitive data needed for Dev
 /docs\ offline/
+
+/github-oidc-trust-policy.json
