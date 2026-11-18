@@ -92,6 +92,9 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           role-session-name: github-production-${{ github.run_id }}
 
+      - name: Verify AWS CDK Python dependency
+        run: python -c "import aws_cdk; print('AWS CDK Python dependency OK')"
+
       - name: CDK synth
         working-directory: infra
         env:

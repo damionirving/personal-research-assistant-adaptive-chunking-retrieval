@@ -7,7 +7,7 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "infra"))
-from pra_infra.stack import validate_hosted_ui_callback_url
+from pra_infra.callback_validation import validate_hosted_ui_callback_url
 
 
 @pytest.mark.parametrize("value", [None, "", "  ", "http://company.test/", "https://", "https://company.test/#fragment", "https://user:pass@company.test/", "https://company.test/\nnext", "https://company.test:invalid/"])
