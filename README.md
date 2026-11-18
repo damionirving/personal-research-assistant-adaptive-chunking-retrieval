@@ -613,20 +613,16 @@ cdk.cmd bootstrap --profile admin-programatic
 Synthesize:
 
 ```cmd
-cdk.cmd synth --profile admin-programatic
+cdk.cmd synth --profile admin-programatic -c hosted_ui_callback_url="<VALID_HTTPS_CALLBACK_URL>"
 ```
 
 Deploy:
 
 ```cmd
-cdk.cmd deploy --profile admin-programatic --force
+cdk.cmd deploy --profile admin-programatic --force -c hosted_ui_callback_url="<VALID_HTTPS_CALLBACK_URL>"
 ```
 
-The current deployed API base URL is:
-
-```text
-https://svr1n7ghpk.execute-api.us-east-1.amazonaws.com/prod/
-```
+Find the API invoke URL in the API Gateway console under the deployed stage, or in the CloudFormation stack outputs. Synthesis requires the explicit `hosted_ui_callback_url` context; missing or invalid values fail. The deployment workflow and PowerShell wrapper explicitly pass the configured website callback as this context value.
 
 The Lambda deployment sets `PRA_API_ROOT_PATH=/prod` so FastAPI and API Gateway agree on the stage prefix. The API also normalizes static asset requests for both common API Gateway shapes: stage-prefixed paths such as `/prod/static/app.css`, and Lambda events where the stage has already been stripped to `/static/app.css` while `root_path` remains `/prod`. After front-end changes, run `cdk deploy` again so the updated static files are bundled into the Lambda asset.
 
@@ -654,7 +650,7 @@ Because the external page signs in through Cognito Hosted UI and returns to its 
 The existing API-served assistant URLs still remain valid too:
 
 - `http://localhost:8000/`
-- `https://svr1n7ghpk.execute-api.us-east-1.amazonaws.com/prod/`
+- The current HTTPS API invoke URL, if explicitly registered as a callback.
 
 In practice, the hosted split is now:
 

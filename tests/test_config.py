@@ -4,7 +4,9 @@ from pydantic import ValidationError
 from pra_core.config import Settings
 
 
-def test_settings_accept_phase_zero_defaults() -> None:
+def test_settings_accept_phase_zero_defaults(monkeypatch) -> None:
+    monkeypatch.delenv("PRA_COGNITO_USER_POOL_ID", raising=False)
+    monkeypatch.delenv("COGNITO_USER_POOL_ID", raising=False)
     settings = Settings()
 
     assert settings.service_name == "personal-research-assistant"

@@ -99,7 +99,7 @@ jobs:
           PRA_COGNITO_CALLBACK_LOGOUT_URL: ${{ vars.COGNITO_CALLBACK_LOGOUT_URL }}
           PRA_WEBSITE_DOMAIN: ${{ vars.WEBSITE_DOMAIN }}
           COST_ALERT_EMAIL: ${{ vars.COST_ALERT_EMAIL }}
-        run: cdk synth -c account=${{ env.AWS_ACCOUNT_ID }} -c region=${{ env.AWS_REGION }} -c owner_email="$COST_ALERT_EMAIL"
+        run: cdk synth -c account=${{ env.AWS_ACCOUNT_ID }} -c region=${{ env.AWS_REGION }} -c owner_email="$COST_ALERT_EMAIL" -c hosted_ui_callback_url="$PRA_COGNITO_CALLBACK_LOGOUT_URL"
 
       - name: CDK deploy
         working-directory: infra
@@ -108,4 +108,4 @@ jobs:
           PRA_COGNITO_CALLBACK_LOGOUT_URL: ${{ vars.COGNITO_CALLBACK_LOGOUT_URL }}
           PRA_WEBSITE_DOMAIN: ${{ vars.WEBSITE_DOMAIN }}
           COST_ALERT_EMAIL: ${{ vars.COST_ALERT_EMAIL }}
-        run: cdk deploy --require-approval never --force -c account=${{ env.AWS_ACCOUNT_ID }} -c region=${{ env.AWS_REGION }} -c owner_email="$COST_ALERT_EMAIL"
+        run: cdk deploy --require-approval never --force -c account=${{ env.AWS_ACCOUNT_ID }} -c region=${{ env.AWS_REGION }} -c owner_email="$COST_ALERT_EMAIL" -c hosted_ui_callback_url="$PRA_COGNITO_CALLBACK_LOGOUT_URL"

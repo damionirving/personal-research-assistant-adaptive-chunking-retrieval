@@ -30,6 +30,21 @@ from constructs import Construct
 from pra_infra.email_validation import validate_owner_email
 
 
+def validate_hosted_ui_callback_url(value: object) -> str:
+    message = "Set CDK context -c hosted_ui_callback_url=<VALID_HTTPS_CALLBACK_URL>."
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(message)
+    value = value.strip()
+    try:
+        parsed = urlsplit(value)
+        if (parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password
+                or parsed.fragment or any(c.isspace() for c in value) or parsed.port is not None and not 1 <= parsed.port <= 65535):
+            raise ValueError(message)
+    except ValueError as exc:
+        raise ValueError(message) from exc
+    return value
+
+
 def _context_bool(scope: Construct, key: str, default: bool) -> str:
     """Return a Lambda-safe boolean string for a CDK context value."""
     value = scope.node.try_get_context(key)
@@ -103,10 +118,7 @@ class PersonalResearchAssistantStack(Stack):
                 domain_prefix=cognito_domain_prefix,
             ),
         )
-        hosted_ui_callback_url = (
-            self.node.try_get_context("hosted_ui_callback_url")
-            or "https://svr1n7ghpk.execute-api.us-east-1.amazonaws.com/prod/"
-        )
+        hosted_ui_callback_url = validate_hosted_ui_callback_url(self.node.try_get_context("hosted_ui_callback_url"))
         website_domain = os.environ.get("PRA_WEBSITE_DOMAIN") or self.node.try_get_context("website_domain")
         if not website_domain or not re.fullmatch(r"(?=.{1,253}$)(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,63}", website_domain):
             raise ValueError("Set PRA_WEBSITE_DOMAIN or website_domain to a valid website hostname.")

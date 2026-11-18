@@ -11,13 +11,13 @@ $account = aws sts get-caller-identity --query Account --output text --region $e
 if ($LASTEXITCODE -ne 0 -or $account -ne $env:PRA_AWS_ACCOUNT_ID) { throw 'AWS identity does not match the configured account.' }
 Push-Location (Join-Path $root 'infra')
 try {
-    cdk synth --quiet
+    cdk synth --quiet -c "hosted_ui_callback_url=$env:PRA_COGNITO_CALLBACK_LOGOUT_URL"
     if ($LASTEXITCODE -ne 0) { throw 'CDK synthesis failed.' }
-    cdk diff
+    cdk diff -c "hosted_ui_callback_url=$env:PRA_COGNITO_CALLBACK_LOGOUT_URL"
     if ($LASTEXITCODE -ne 0) { throw 'CDK diff failed.' }
     if ($Deploy) {
         if ((Read-Host 'Review the diff. Type DEPLOY to confirm production deployment') -cne 'DEPLOY') { throw 'Deployment cancelled.' }
-        cdk deploy
+        cdk deploy -c "hosted_ui_callback_url=$env:PRA_COGNITO_CALLBACK_LOGOUT_URL"
         if ($LASTEXITCODE -ne 0) { throw 'CDK deployment failed.' }
     }
 } finally { Pop-Location }
